@@ -1,3 +1,16 @@
+relation-check-result
+out-view
+test.temp
+.vscode-test
+/out
+
+yarn.lock
+.DS_Store
+*.vsix
+
+// These files will be generated from the i18n folder
+*nls.*.json
+
 # Logs
 logs
 *.log

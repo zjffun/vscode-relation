@@ -1,0 +1,20 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+  "files.exclude": {
+    ".vscode-test": true,
+    "node_modules": true,
+    "out": true,
+    "out-view": true
+  },
+  "search.exclude": {
+    "out-view": true,
+    "out": true
+  },
+  // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
+  "typescript.tsc.autoDetect": "off",
+  "cSpell.words": [
+    "codicon",
+    "codicons",
+    "zjffun"
+  ]
+}
