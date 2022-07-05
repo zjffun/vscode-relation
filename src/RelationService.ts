@@ -60,6 +60,7 @@ export class RelationService {
             return {
               name: d[0],
               uri: relationJSONUri,
+              workspaceFolderUri: folder.uri,
               children: d[1],
             };
           });

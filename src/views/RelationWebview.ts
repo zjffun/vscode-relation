@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as nls from "vscode-nls";
+import { IRelation } from "..";
 import { getNonce } from "../util";
 
 const localize = nls.loadMessageBundle();
@@ -13,7 +14,7 @@ export class RelationWebview {
 
   constructor(
     private readonly context: vscode.ExtensionContext,
-    private readonly uri: vscode.Uri
+    private readonly relation: IRelation
   ) {
     this.panel = vscode.window.createWebviewPanel(
       RelationWebview.viewType,
@@ -81,8 +82,34 @@ export class RelationWebview {
       )
     );
 
+    const relationScriptUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this.context.extensionUri,
+        "node_modules",
+        "relation2",
+        "dist",
+        "view",
+        "bundle.js"
+      )
+    );
+
     // Use a nonce to whitelist which scripts can be run
     const nonce = getNonce();
+
+    const relations = await checkRelations({
+      cwd: this.relation.workspaceFolderUri.path,
+    });
+
+    const relationsJSONString = JSON.stringify(
+      Array.from(relations.values()),
+      (key, value: any) => {
+        if (value instanceof Map) {
+          return Array.from(value.entries());
+        }
+        return value;
+      },
+      2
+    );
 
     return /* html */ `
 			<!DOCTYPE html>
@@ -96,7 +123,7 @@ export class RelationWebview {
 				-->
 				<meta http-equiv="Content-Security-Policy" content="default-src 'none';
           img-src ${webview.cspSource};
-          style-src ${webview.cspSource} 'nonce-${nonce}';
+          style-src ${webview.cspSource} 'unsafe-inline';
           font-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
         <meta property="csp-nonce" content="${nonce}" />
        
@@ -105,7 +132,7 @@ export class RelationWebview {
 				<link href="${codiconsUri}" rel="stylesheet" />
 				<link href="${styleResetUri}" rel="stylesheet" />
 				<link href="${styleVSCodeUri}" rel="stylesheet" />
-				<link href="${styleUri}" rel="stylesheet" />
+				<!-- <link href="${styleUri}" rel="stylesheet" /> -->
 
         <script nonce="${nonce}" src="${globalErrorHandlerUri}"></script>
         <script type="module" nonce="${nonce}" src="${toolkitUri}"></script>
@@ -118,10 +145,10 @@ export class RelationWebview {
         </div>
         <script nonce="${nonce}">
           window.i18nText = ${JSON.stringify(i18nText)}
-          // todo
-          window.checkResults = ${JSON.stringify(checkRelations(this.uri.path))}
+          window.checkResults = ${relationsJSONString}
         </script>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
+        <script nonce="${nonce}" src="${relationScriptUri}"></script>
 			</body>
 			</html>`;
   }

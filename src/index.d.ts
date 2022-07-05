@@ -6,5 +6,6 @@ export interface IRelation extends IRawRelation {}
 export interface IRelationContainer {
   name: string;
   uri?: vscode.Uri;
+  workspaceFolderUri?: vscode.Uri;
   children: IRelationContainer[] | IRelation[];
 }
