@@ -44,12 +44,23 @@
         }
       ]
     },
-    "menus": {},
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "_vscode-relation.createRelation",
+          "when": "!explorerResourceIsFolder"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "_vscode-relation.showRelation",
         "title": "%extension.showRelation.title%",
         "icon": "$(book)"
+      },
+      {
+        "command": "_vscode-relation.createRelation",
+        "title": "%extension.createRelation.title%"
       }
     ],
     "customEditors": []

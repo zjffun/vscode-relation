@@ -56,14 +56,17 @@ export class RelationService {
 
           const relationsGroupBySrcPath = _.groupBy(relations, "srcPath");
 
-          relations = Object.entries(relationsGroupBySrcPath).map((d) => {
-            return {
-              name: d[0],
-              uri: relationJSONUri,
-              workspaceFolderUri: folder.uri,
-              children: d[1],
-            };
-          });
+          relations = Object.entries(relationsGroupBySrcPath).map(
+            ([srcPath, relation]) => {
+              return {
+                name: srcPath,
+                uri: relationJSONUri,
+                workspaceFolderUri: folder.uri,
+                children: relation,
+                srcPath: srcPath,
+              };
+            }
+          );
         } catch (error: any) {
           log.appendLine(error?.message);
           continue;

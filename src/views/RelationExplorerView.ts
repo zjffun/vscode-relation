@@ -47,7 +47,7 @@ export default class RelationExplorerView
 
     return {
       label: `L${element.srcRange.join(",")}`,
-      command: undefined,
+      command: showRelationCommand,
       collapsibleState: undefined,
       contextValue: contextValue,
     };

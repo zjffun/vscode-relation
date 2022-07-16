@@ -18,14 +18,13 @@ export class RelationWebview {
   ) {
     this.panel = vscode.window.createWebviewPanel(
       RelationWebview.viewType,
-      "todo",
+      `${relation.srcPath} -> ${relation.path}`,
       vscode.ViewColumn.One,
       {
         enableScripts: true,
       }
     );
 
-    this.panel.title = "todo";
     this.getHtmlForWebview(this.panel.webview).then((html) => {
       this.panel.webview.html = html;
     });
@@ -146,6 +145,12 @@ export class RelationWebview {
         <script nonce="${nonce}">
           window.i18nText = ${JSON.stringify(i18nText)}
           window.checkResults = ${relationsJSONString}
+        </script>
+        <script nonce="${nonce}">
+          window.relationSearchParams = ${JSON.stringify({
+            id: this.relation.id,
+            srcPath: this.relation.srcPath,
+          })}
         </script>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
         <script nonce="${nonce}" src="${relationScriptUri}"></script>

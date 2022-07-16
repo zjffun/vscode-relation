@@ -5,6 +5,7 @@ import "./nlsConfig";
 // Add a newline, wait for [Automatically create sort groups based on newlines in organize imports](https://github.com/microsoft/TypeScript/pull/48330)
 
 import showRelation from "./commands/showRelation";
+import createRelation from "./commands/createRelation";
 import { setContext } from "./share";
 import { registerHelpAndFeedbackView } from "./views/helpAndFeedbackView";
 import refreshAllView from "./views/refreshAllView";
@@ -16,6 +17,15 @@ export function activate(context: vscode.ExtensionContext) {
   setContext(context);
 
   new RelationExplorerView(context);
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "_vscode-relation.createRelation",
+      (data) => {
+        createRelation(data);
+      }
+    )
+  );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("_vscode-relation.showRelation", (data) => {

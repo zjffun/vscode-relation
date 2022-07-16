@@ -1,4 +1,6 @@
 {
+  "extension.showRelation.title": "查看联系",
+  "extension.createRelation.title": "创建联系",
   "extension.relationView.title": "联系",
   "extension.RelationExplorerView.name": "联系",
   "extension.HelpAndFeedback.name": "帮助和反馈"
