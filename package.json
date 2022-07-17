@@ -47,7 +47,11 @@
     "menus": {
       "explorer/context": [
         {
-          "command": "_vscode-relation.createRelation",
+          "command": "_vscode-relation._createRelationFrom",
+          "when": "!explorerResourceIsFolder"
+        },
+        {
+          "command": "_vscode-relation._createRelationTo",
           "when": "!explorerResourceIsFolder"
         }
       ]
@@ -61,6 +65,14 @@
       {
         "command": "_vscode-relation.createRelation",
         "title": "%extension.createRelation.title%"
+      },
+      {
+        "command": "_vscode-relation._createRelationFrom",
+        "title": "%extension.createRelationFrom.title%"
+      },
+      {
+        "command": "_vscode-relation._createRelationTo",
+        "title": "%extension.createRelationTo.title%"
       }
     ],
     "customEditors": []

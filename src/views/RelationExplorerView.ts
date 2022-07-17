@@ -38,7 +38,7 @@ export default class RelationExplorerView
 
     if (isContainer) {
       return {
-        label: element.name,
+        label: (element as IRelationContainer).name,
         command: showRelationCommand,
         collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
         contextValue: contextValue,
@@ -46,7 +46,7 @@ export default class RelationExplorerView
     }
 
     return {
-      label: `L${element.srcRange.join(",")}`,
+      label: `L${(element as IRelation).srcRange.join(",")}`,
       command: showRelationCommand,
       collapsibleState: undefined,
       contextValue: contextValue,

@@ -1,6 +1,8 @@
 {
   "extension.showRelation.title": "Show Relation",
   "extension.createRelation.title": "Create Relation",
+  "extension.createRelationFrom.title": "Create Relation From This File",
+  "extension.createRelationTo.title": "Create Relation To This File",
   "extension.relationView.title": "Relation",
   "extension.RelationExplorerView.name": "Relation",
   "extension.HelpAndFeedback.name": "Help And Feedback"

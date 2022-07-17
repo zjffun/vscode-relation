@@ -1,33 +1,42 @@
 import * as vscode from "vscode";
 import * as nls from "vscode-nls";
-import { IRelation } from "..";
+import createRelation from "../core/createRelation";
+import { context } from "../share";
 import { getNonce } from "../util";
 
 const localize = nls.loadMessageBundle();
 
 const i18nText = {};
 
-export class RelationWebview {
-  public static readonly viewType = "vscode-relation.RelationWebview";
+let relationFormWebviewSingleton: RelationFormWebview | null = null;
+
+export class RelationFormWebview {
+  public static readonly viewType = "vscode-relation.RelationFormWebview";
 
   private panel: vscode.WebviewPanel;
 
-  constructor(
-    private readonly context: vscode.ExtensionContext,
-    private readonly relation: IRelation
-  ) {
+  constructor() {
     this.panel = vscode.window.createWebviewPanel(
-      RelationWebview.viewType,
-      `${relation.srcPath} -> ${relation.path}`,
+      RelationFormWebview.viewType,
+      `RelationForm`,
       vscode.ViewColumn.One,
       {
         enableScripts: true,
+        retainContextWhenHidden: true,
       }
     );
 
     this.getHtmlForWebview(this.panel.webview).then((html) => {
       this.panel.webview.html = html;
     });
+  }
+
+  public postMessage({ type, payload }: { type: string; payload: any }) {
+    this.panel.webview.postMessage({ type, payload });
+  }
+
+  public reveal() {
+    this.panel.reveal();
   }
 
   private async getHtmlForWebview(webview: vscode.Webview): Promise<string> {
@@ -37,16 +46,16 @@ export class RelationWebview {
 
     // Local path to script and css for the webview
     const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "out-view", "main.js")
+      vscode.Uri.joinPath(context.extensionUri, "out-view", "main.js")
     );
 
     const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "out-view", "main.css")
+      vscode.Uri.joinPath(context.extensionUri, "out-view", "main.css")
     );
 
     const codiconsUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
-        this.context.extensionUri,
+        context.extensionUri,
         "node_modules",
         "@vscode/codicons",
         "dist",
@@ -55,16 +64,16 @@ export class RelationWebview {
     );
 
     const styleResetUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "media", "reset.css")
+      vscode.Uri.joinPath(context.extensionUri, "media", "reset.css")
     );
 
     const styleVSCodeUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "media", "vscode.css")
+      vscode.Uri.joinPath(context.extensionUri, "media", "vscode.css")
     );
 
     const globalErrorHandlerUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
-        this.context.extensionUri,
+        context.extensionUri,
         "media",
         "globalErrorHandler.js"
       )
@@ -72,7 +81,7 @@ export class RelationWebview {
 
     const toolkitUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
-        this.context.extensionUri,
+        context.extensionUri,
         "node_modules",
         "@vscode",
         "webview-ui-toolkit",
@@ -83,32 +92,44 @@ export class RelationWebview {
 
     const relationScriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
-        this.context.extensionUri,
+        context.extensionUri,
         "node_modules",
         "relation2",
         "dist",
         "view",
-        "bundle.js"
+        "form.js"
       )
     );
 
     // Use a nonce to whitelist which scripts can be run
     const nonce = getNonce();
 
-    const relations = await checkRelations({
-      cwd: this.relation?.workspaceFolderUri?.path,
+    webview.onDidReceiveMessage(({ type, payload }) => {
+      switch (type) {
+        case "submitRelationFormData":
+          const formData = Object.fromEntries(payload);
+          createRelation({
+            formPath: formData["source.from.path"],
+            toPath: formData["source.to.path"],
+          });
+          return;
+      }
     });
 
-    const relationsJSONString = JSON.stringify(
-      Array.from(relations.values()),
-      (key, value: any) => {
-        if (value instanceof Map) {
-          return Array.from(value.entries());
-        }
-        return value;
-      },
-      2
-    );
+    // const relations = await checkRelations({
+    //   cwd: this.relation.workspaceFolderUri.path,
+    // });
+
+    // const relationsJSONString = JSON.stringify(
+    //   Array.from(relations.values()),
+    //   (key, value: any) => {
+    //     if (value instanceof Map) {
+    //       return Array.from(value.entries());
+    //     }
+    //     return value;
+    //   },
+    //   2
+    // );
 
     return /* html */ `
 			<!DOCTYPE html>
@@ -144,17 +165,39 @@ export class RelationWebview {
         </div>
         <script nonce="${nonce}">
           window.i18nText = ${JSON.stringify(i18nText)}
-          window.checkResults = ${relationsJSONString}
         </script>
         <script nonce="${nonce}">
-          window.relationSearchParams = ${JSON.stringify({
-            id: this.relation.id,
-            srcPath: this.relation.srcPath,
-          })}
+          window.addEventListener("message", (event) => {
+            const message = event.data;
+            switch (message.type) {
+              case "setFormData":
+                console.log(message)
+                document.dispatchEvent(new CustomEvent("setRelationFormData", {
+                  detail: {
+                    formData: message.payload,
+                    merge: true,
+                  },
+                }))
+                return;
+            }
+          });
+          document.addEventListener("submitRelationFormData", (event) => {
+            window.vsCodeApi.postMessage({
+              type: "submitRelationFormData",
+              payload: [...event.detail.entries()]
+            });
+          });
         </script>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
         <script nonce="${nonce}" src="${relationScriptUri}"></script>
 			</body>
 			</html>`;
+  }
+
+  static singleton() {
+    if (relationFormWebviewSingleton) {
+      return relationFormWebviewSingleton;
+    }
+    return (relationFormWebviewSingleton = new RelationFormWebview());
   }
 }

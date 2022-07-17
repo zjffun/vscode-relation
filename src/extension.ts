@@ -10,6 +10,7 @@ import { setContext } from "./share";
 import { registerHelpAndFeedbackView } from "./views/helpAndFeedbackView";
 import refreshAllView from "./views/refreshAllView";
 import RelationExplorerView from "./views/RelationExplorerView";
+import setCreateRelationForm from "./commands/setCreateRelationForm";
 
 export const log = vscode.window.createOutputChannel("Relation");
 
@@ -19,10 +20,43 @@ export function activate(context: vscode.ExtensionContext) {
   new RelationExplorerView(context);
 
   context.subscriptions.push(
+    vscode.commands.registerCommand("_vscode-relation.createRelation", () => {
+      createRelation();
+    })
+  );
+
+  context.subscriptions.push(
     vscode.commands.registerCommand(
-      "_vscode-relation.createRelation",
-      (data) => {
-        createRelation(data);
+      "_vscode-relation._createRelationFrom",
+      (uri) => {
+        const path = uri.path;
+
+        if (!path) {
+          return false;
+        }
+
+        setCreateRelationForm({
+          type: "from",
+          path,
+        });
+      }
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "_vscode-relation._createRelationTo",
+      (uri) => {
+        const path = uri.path;
+
+        if (!path) {
+          return false;
+        }
+
+        setCreateRelationForm({
+          type: "to",
+          path,
+        });
       }
     )
   );
