@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as nls from "vscode-nls";
-import { IRelation } from "..";
+import { IRelation, IRelationContainer } from "..";
 import { getNonce } from "../util";
 
 const localize = nls.loadMessageBundle();
@@ -14,11 +14,18 @@ export class RelationWebview {
 
   constructor(
     private readonly context: vscode.ExtensionContext,
-    private readonly relation: IRelation
+    private readonly relation: IRelationContainer | IRelation
   ) {
+    let subTitle = relation.name;
+    if ((relation as IRelation).srcPath) {
+      subTitle = `${(relation as IRelation).srcPath}#${relation.name}`;
+    }
+
+    const title = `Relation ${subTitle}`;
+
     this.panel = vscode.window.createWebviewPanel(
       RelationWebview.viewType,
-      `${relation.srcPath} -> ${relation.path}`,
+      title,
       vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -148,8 +155,8 @@ export class RelationWebview {
         </script>
         <script nonce="${nonce}">
           window.relationSearchParams = ${JSON.stringify({
-            id: this.relation.id,
-            srcPath: this.relation.srcPath,
+            id: (this.relation as IRelation).id,
+            srcPath: (this.relation as IRelation).srcPath,
           })}
         </script>
 				<script nonce="${nonce}" src="${scriptUri}"></script>

@@ -7,3 +7,7 @@ export function getNonce() {
   }
   return text;
 }
+
+export function rangeToString(range: [number, number]) {
+  return `L${range[0]}-L${range[1]}`;
+}

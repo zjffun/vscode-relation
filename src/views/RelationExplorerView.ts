@@ -34,22 +34,20 @@ export default class RelationExplorerView
       arguments: [element],
     };
 
-    let contextValue = "";
+    let contextValue = "vscode-relation-relationExplorerView-container";
 
     if (isContainer) {
       return {
-        label: (element as IRelationContainer).name,
-        command: showRelationCommand,
+        label: element.name,
         collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-        contextValue: contextValue,
+        contextValue,
       };
     }
 
     return {
-      label: `L${(element as IRelation).srcRange.join(",")}`,
+      label: element.name,
       command: showRelationCommand,
       collapsibleState: undefined,
-      contextValue: contextValue,
     };
   }
 

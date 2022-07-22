@@ -4,7 +4,7 @@ import "./nlsConfig";
 
 // Add a newline, wait for [Automatically create sort groups based on newlines in organize imports](https://github.com/microsoft/TypeScript/pull/48330)
 
-import showRelation from "./commands/showRelation";
+import showRelation, { showRelationCommandId } from "./commands/showRelation";
 import createRelation from "./commands/createRelation";
 import { setContext } from "./share";
 import { registerHelpAndFeedbackView } from "./views/helpAndFeedbackView";
@@ -62,7 +62,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("_vscode-relation.showRelation", (data) => {
+    vscode.commands.registerCommand(showRelationCommandId, (data) => {
       showRelation(data);
     })
   );

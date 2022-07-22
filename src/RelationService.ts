@@ -2,6 +2,7 @@ import * as _ from "lodash";
 import * as vscode from "vscode";
 import { IRelation, IRelationContainer } from ".";
 import { log } from "./extension";
+import { rangeToString } from "./util";
 import { refresh } from "./views/RelationExplorerView";
 
 export class RelationService {
@@ -57,12 +58,16 @@ export class RelationService {
           const relationsGroupBySrcPath = _.groupBy(relations, "srcPath");
 
           relations = Object.entries(relationsGroupBySrcPath).map(
-            ([srcPath, relation]) => {
+            ([srcPath, children]) => {
               return {
                 name: srcPath,
                 uri: relationJSONUri,
                 workspaceFolderUri: folder.uri,
-                children: relation,
+                children: children.map((child) => ({
+                  ...child,
+                  name: rangeToString(child.range),
+                  workspaceFolderUri: folder.uri,
+                })),
                 srcPath: srcPath,
               };
             }
@@ -75,6 +80,7 @@ export class RelationService {
         tree.push({
           name: folder.name,
           uri: relationJSONUri,
+          workspaceFolderUri: folder.uri,
           children: relations,
         });
       }

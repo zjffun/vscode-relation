@@ -28,7 +28,7 @@
         {
           "id": "vscode-relation-relationView",
           "title": "%extension.relationView.title%",
-          "icon": "$(symbol-link)"
+          "icon": "images/icon.png"
         }
       ]
     },
@@ -45,6 +45,13 @@
       ]
     },
     "menus": {
+      "view/item/context": [
+        {
+          "command": "_vscode-relation.showRelation",
+          "when": "viewItem == vscode-relation-relationExplorerView-container",
+          "group": "inline@1"
+        }
+      ],
       "explorer/context": [
         {
           "command": "_vscode-relation._createRelationFrom",
