@@ -3,6 +3,8 @@
   "extension.createRelation.title": "创建联系",
   "extension.createRelationFrom.title": "从这个文件创建联系",
   "extension.createRelationTo.title": "创建联系到这个文件",
+  "extension.deleteRelation.title": "删除联系",
+  "extension.refresh.title": "刷新",
   "extension.relationView.title": "联系",
   "extension.RelationExplorerView.name": "联系",
   "extension.HelpAndFeedback.name": "帮助和反馈"

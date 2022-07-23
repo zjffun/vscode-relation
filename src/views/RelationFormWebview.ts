@@ -109,7 +109,7 @@ export class RelationFormWebview {
         case "submitRelationFormData":
           const formData = Object.fromEntries(payload);
           createRelation({
-            formPath: formData["source.from.path"],
+            fromPath: formData["source.from.path"],
             toPath: formData["source.to.path"],
           });
           return;

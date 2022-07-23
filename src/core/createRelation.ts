@@ -2,11 +2,15 @@ import * as path from "node:path";
 import * as vscode from "vscode";
 
 export default async ({
-  formPath,
+  fromPath,
   toPath,
+  fromRev,
+  toRev,
 }: {
-  formPath: string;
+  fromPath: string;
   toPath: string;
+  fromRev?: string;
+  toRev?: string;
 }) => {
   const { getInfo, createRelation } = await new Function(
     `return new Promise((res) => res(import("relation2")))`
@@ -27,7 +31,7 @@ export default async ({
 
   const { srcCwd } = getInfo({ cwd });
 
-  const fromRelativePath = path.relative(srcCwd, formPath);
+  const fromRelativePath = path.relative(srcCwd, fromPath);
 
   const result = await vscode.window.showInformationMessage(
     `Create relation ${fromRelativePath} -> ${toRelativePath}`,
@@ -41,10 +45,10 @@ export default async ({
   if (result === "Yes") {
     await createRelation({
       cwd,
-      rev: "HEAD",
-      srcRev: "HEAD",
-      srcPath: fromRelativePath,
-      path: toRelativePath,
+      fromPath: fromRelativePath,
+      toPath: toRelativePath,
+      fromRev: !fromRev ? "HEAD" : fromRev,
+      toRev: !toRev ? "HEAD" : toRev,
     });
 
     return true;

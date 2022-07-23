@@ -45,6 +45,13 @@
       ]
     },
     "menus": {
+      "view/title": [
+        {
+          "command": "vscode-relation.refresh",
+          "when": "view == vscode-relation-relationsView-RelationExplorerView",
+          "group": "navigation@10"
+        }
+      ],
       "view/item/context": [
         {
           "command": "_vscode-relation.showRelation",
@@ -80,6 +87,16 @@
       {
         "command": "_vscode-relation._createRelationTo",
         "title": "%extension.createRelationTo.title%"
+      },
+      {
+        "command": "_vscode-relation._deleteRelation",
+        "title": "%extension.deleteRelation.title%"
+      },
+      {
+        "command": "vscode-relation.refresh",
+        "title": "%extension.refresh.title%",
+        "icon": "$(refresh)",
+        "category": "Relation"
       }
     ],
     "customEditors": []

@@ -51,24 +51,29 @@ export class RelationService {
           "relation.json"
         );
 
-        let relations = [];
+        let relationContainers: IRelationContainer[] = [];
         try {
-          relations = await RelationService.getRelationsByUri(relationJSONUri);
+          const relations = await RelationService.getRelationsByUri(
+            relationJSONUri
+          );
 
-          const relationsGroupBySrcPath = _.groupBy(relations, "srcPath");
+          const relationsGroupByFromPath = _.groupBy(relations, "fromPath");
 
-          relations = Object.entries(relationsGroupBySrcPath).map(
-            ([srcPath, children]) => {
+          relationContainers = Object.entries(relationsGroupByFromPath).map(
+            ([fromPath, children]) => {
               return {
-                name: srcPath,
+                name: fromPath,
                 uri: relationJSONUri,
                 workspaceFolderUri: folder.uri,
-                children: children.map((child) => ({
-                  ...child,
-                  name: rangeToString(child.range),
-                  workspaceFolderUri: folder.uri,
-                })),
-                srcPath: srcPath,
+                fromPath,
+                children: children.map((child) => {
+                  console.log(child);
+                  return {
+                    ...child,
+                    name: rangeToString(child.fromRange),
+                    workspaceFolderUri: folder.uri,
+                  };
+                }),
               };
             }
           );
@@ -81,7 +86,7 @@ export class RelationService {
           name: folder.name,
           uri: relationJSONUri,
           workspaceFolderUri: folder.uri,
-          children: relations,
+          children: relationContainers,
         });
       }
     }

@@ -11,6 +11,9 @@ import { registerHelpAndFeedbackView } from "./views/helpAndFeedbackView";
 import refreshAllView from "./views/refreshAllView";
 import RelationExplorerView from "./views/RelationExplorerView";
 import setCreateRelationForm from "./commands/setCreateRelationForm";
+import deleteRelation, {
+  deleteRelationCommandId,
+} from "./commands/deleteRelation";
 
 export const log = vscode.window.createOutputChannel("Relation");
 
@@ -64,6 +67,12 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(showRelationCommandId, (data) => {
       showRelation(data);
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(deleteRelationCommandId, (data) => {
+      deleteRelation(data);
     })
   );
 

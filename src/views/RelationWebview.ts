@@ -17,8 +17,8 @@ export class RelationWebview {
     private readonly relation: IRelationContainer | IRelation
   ) {
     let subTitle = relation.name;
-    if ((relation as IRelation).srcPath) {
-      subTitle = `${(relation as IRelation).srcPath}#${relation.name}`;
+    if (!(relation as IRelationContainer).children) {
+      subTitle = `${(relation as IRelation).fromPath}#${relation.name}`;
     }
 
     const title = `Relation ${subTitle}`;
@@ -156,7 +156,7 @@ export class RelationWebview {
         <script nonce="${nonce}">
           window.relationSearchParams = ${JSON.stringify({
             id: (this.relation as IRelation).id,
-            srcPath: (this.relation as IRelation).srcPath,
+            fromPath: (this.relation as IRelation).fromPath,
           })}
         </script>
 				<script nonce="${nonce}" src="${scriptUri}"></script>

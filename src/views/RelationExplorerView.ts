@@ -19,6 +19,8 @@ export default class RelationExplorerView
       treeDataProvider: this,
       showCollapseAll: true,
     });
+
+    relationExplorerView = this;
   }
 
   public refresh(): any {
