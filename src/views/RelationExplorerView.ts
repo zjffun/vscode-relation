@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { IRelation, IRelationContainer } from "..";
 import { RelationService } from "../RelationService";
 import { log } from "../extension";
+import { showRelationCommandId } from "../commands/showRelation";
 
 let relationExplorerView: RelationExplorerView;
 
@@ -28,15 +29,19 @@ export default class RelationExplorerView
   }
 
   public getTreeItem(element: IRelation | IRelationContainer): vscode.TreeItem {
-    const { children: isContainer } = <IRelationContainer>element;
+    const { children: isContainer, isWorkspace } = <IRelationContainer>element;
 
     const showRelationCommand = {
-      command: "_vscode-relation.showRelation",
+      command: showRelationCommandId,
       title: "Show relation of this file.",
       arguments: [element],
     };
 
-    let contextValue = "vscode-relation-relationExplorerView-container";
+    let contextValue = "vscode-relation-relationExplorerView-file";
+
+    if (isWorkspace) {
+      contextValue = "vscode-relation-relationExplorerView-workspace";
+    }
 
     if (isContainer) {
       return {

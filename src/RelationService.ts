@@ -67,7 +67,6 @@ export class RelationService {
                 workspaceFolderUri: folder.uri,
                 fromPath,
                 children: children.map((child) => {
-                  console.log(child);
                   return {
                     ...child,
                     name: rangeToString(child.fromRange),
@@ -87,6 +86,7 @@ export class RelationService {
           uri: relationJSONUri,
           workspaceFolderUri: folder.uri,
           children: relationContainers,
+          isWorkspace: true,
         });
       }
     }

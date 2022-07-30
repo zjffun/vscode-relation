@@ -40,10 +40,6 @@ export class RelationFormWebview {
   }
 
   private async getHtmlForWebview(webview: vscode.Webview): Promise<string> {
-    const { checkRelations } = await new Function(
-      `return new Promise((res) => res(import("relation2")))`
-    )();
-
     // Local path to script and css for the webview
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(context.extensionUri, "out-view", "main.js")
@@ -111,6 +107,8 @@ export class RelationFormWebview {
           createRelation({
             fromPath: formData["source.from.path"],
             toPath: formData["source.to.path"],
+            fromRev: formData["source.from.revision"],
+            toRev: formData["source.to.revision"],
           });
           return;
       }
@@ -171,7 +169,6 @@ export class RelationFormWebview {
             const message = event.data;
             switch (message.type) {
               case "setFormData":
-                console.log(message)
                 document.dispatchEvent(new CustomEvent("setRelationFormData", {
                   detail: {
                     formData: message.payload,

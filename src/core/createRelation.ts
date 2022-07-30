@@ -1,5 +1,6 @@
-import * as path from "node:path";
 import * as vscode from "vscode";
+
+import { createRelation } from "relation2";
 
 export default async ({
   fromPath,
@@ -12,10 +13,6 @@ export default async ({
   fromRev?: string;
   toRev?: string;
 }) => {
-  const { getInfo, createRelation } = await new Function(
-    `return new Promise((res) => res(import("relation2")))`
-  )();
-
   const uri = vscode.Uri.parse(toPath);
 
   const workspace = vscode.workspace.getWorkspaceFolder(uri);
@@ -27,14 +24,8 @@ export default async ({
   const workspaceUri = workspace.uri;
   const cwd = workspaceUri.path;
 
-  const toRelativePath = path.relative(cwd, toPath);
-
-  const { srcCwd } = getInfo({ cwd });
-
-  const fromRelativePath = path.relative(srcCwd, fromPath);
-
   const result = await vscode.window.showInformationMessage(
-    `Create relation ${fromRelativePath} -> ${toRelativePath}`,
+    `Create relation ${fromPath} -> ${toPath}`,
     {
       modal: true,
     },
@@ -45,8 +36,8 @@ export default async ({
   if (result === "Yes") {
     await createRelation({
       cwd,
-      fromPath: fromRelativePath,
-      toPath: toRelativePath,
+      fromPath: fromPath,
+      toPath: toPath,
       fromRev: !fromRev ? "HEAD" : fromRev,
       toRev: !toRev ? "HEAD" : toRev,
     });

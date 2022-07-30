@@ -1,10 +1,6 @@
 // Place your settings in this file to overwrite default and user settings.
 {
-  "files.exclude": {
-    ".vscode-test": true,
-    "out": true,
-    "out-view": true
-  },
+  "files.exclude": {},
   "search.exclude": {
     "out-view": true,
     "out": true

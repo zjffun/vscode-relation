@@ -1,7 +1,10 @@
 import * as vscode from "vscode";
 import * as nls from "vscode-nls";
+
+import { checkRelations } from "relation2";
 import { IRelation, IRelationContainer } from "..";
 import { getNonce } from "../util";
+
 
 const localize = nls.loadMessageBundle();
 
@@ -38,10 +41,6 @@ export class RelationWebview {
   }
 
   private async getHtmlForWebview(webview: vscode.Webview): Promise<string> {
-    const { checkRelations } = await new Function(
-      `return new Promise((res) => res(import("relation2")))`
-    )();
-
     // Local path to script and css for the webview
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.context.extensionUri, "out-view", "main.js")
