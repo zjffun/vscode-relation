@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { filterRelation, IRawRelation } from "relation2";
+import { filterRelation, IRawRelation } from "relation2-core";
 import { IRelation, IRelationContainer } from "..";
 
 export const deleteRelationCommandId = "_vscode-relation._deleteRelation";

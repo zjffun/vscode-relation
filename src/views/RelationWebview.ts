@@ -1,10 +1,9 @@
 import * as vscode from "vscode";
 import * as nls from "vscode-nls";
 
-import { checkRelations } from "relation2";
+import { checkRelations } from "relation2-core";
 import { IRelation, IRelationContainer } from "..";
 import { getNonce } from "../util";
-
 
 const localize = nls.loadMessageBundle();
 
@@ -91,9 +90,8 @@ export class RelationWebview {
       vscode.Uri.joinPath(
         this.context.extensionUri,
         "node_modules",
-        "relation2",
+        "relation2-page",
         "dist",
-        "view",
         "bundle.js"
       )
     );

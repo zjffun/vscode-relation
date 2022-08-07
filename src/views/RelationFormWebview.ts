@@ -90,9 +90,8 @@ export class RelationFormWebview {
       vscode.Uri.joinPath(
         context.extensionUri,
         "node_modules",
-        "relation2",
+        "relation2-page",
         "dist",
-        "view",
         "form.js"
       )
     );

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { IRawRelation } from "relation2";
+import { IRawRelation } from "relation2-core";
 
 interface IRelationBase {
   name: string;

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { createRelation } from "relation2";
+import { createRelation } from "relation2-core";
 
 export default async ({
   fromPath,
