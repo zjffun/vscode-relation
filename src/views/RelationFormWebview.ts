@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as nls from "vscode-nls";
 import createRelation from "../core/createRelation";
+import insertRelation from "../core/insertRelation";
 import { context } from "../share";
 import { getNonce } from "../util";
 
@@ -103,12 +104,33 @@ export class RelationFormWebview {
       switch (type) {
         case "submitRelationFormData":
           const formData = Object.fromEntries(payload);
-          createRelation({
-            fromPath: formData["source.from.path"],
-            toPath: formData["source.to.path"],
-            fromRev: formData["source.from.revision"],
-            toRev: formData["source.to.revision"],
-          });
+          switch (formData["source.from.formConfig"]) {
+            case "fileLine":
+              insertRelation({
+                fromPath: formData["source.from.path"],
+                toPath: formData["source.to.path"],
+                fromRev: formData["source.from.revision"],
+                toRev: formData["source.to.revision"],
+                fromRange: [
+                  +formData["source.from.startLine"],
+                  +formData["source.from.endLine"],
+                ],
+                toRange: [
+                  +formData["source.to.startLine"],
+                  +formData["source.to.endLine"],
+                ],
+              });
+              break;
+            default:
+              createRelation({
+                fromPath: formData["source.from.path"],
+                toPath: formData["source.to.path"],
+                fromRev: formData["source.from.revision"],
+                toRev: formData["source.to.revision"],
+              });
+              break;
+          }
+
           return;
       }
     });

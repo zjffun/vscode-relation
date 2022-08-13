@@ -146,9 +146,21 @@ export class RelationWebview {
 				<div id="root">
           <vscode-progress-ring></vscode-progress-ring>
         </div>
+        <script id="relationText" type="text">
+          ${relationsJSONString.replaceAll(
+            "</script>",
+            "<___REPLACE_SCRIPT_TAG____/script>"
+          )}
+        </script>
         <script nonce="${nonce}">
-          window.i18nText = ${JSON.stringify(i18nText)}
-          window.checkResults = ${relationsJSONString}
+          window.i18nText = ${JSON.stringify(i18nText)};
+
+          // fix script tag in JSON content
+          const checkResultsJSONString = document.getElementById("relationText").innerHTML.trim();
+          window.checkResults = JSON.parse(checkResultsJSONString.replaceAll(
+            "<___REPLACE_SCRIPT_TAG____/script>",
+            "<" + "/script>"
+          ));
         </script>
         <script nonce="${nonce}">
           window.relationSearchParams = ${JSON.stringify({

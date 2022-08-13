@@ -73,6 +73,18 @@
           "command": "_vscode-relation._createRelationTo",
           "when": "!explorerResourceIsFolder"
         }
+      ],
+      "editor/context": [
+        {
+          "command": "_vscode-relation._createRelationFromRange",
+          "when": "editorHasSelection",
+          "group": "relation"
+        },
+        {
+          "command": "_vscode-relation._createRelationToRange",
+          "when": "editorHasSelection",
+          "group": "relation"
+        }
       ]
     },
     "commands": [
@@ -92,6 +104,14 @@
       {
         "command": "_vscode-relation._createRelationTo",
         "title": "%extension.createRelationTo.title%"
+      },
+      {
+        "command": "_vscode-relation._createRelationFromRange",
+        "title": "%extension.createRelationFromRange.title%"
+      },
+      {
+        "command": "_vscode-relation._createRelationToRange",
+        "title": "%extension.createRelationToRange.title%"
       },
       {
         "command": "_vscode-relation._deleteRelation",
