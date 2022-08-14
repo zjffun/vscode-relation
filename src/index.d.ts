@@ -11,6 +11,7 @@ export interface IRelation extends IRawRelation, IRelationBase {}
 export interface IRelationContainer extends IRelationBase {
   uri?: vscode.Uri;
   fromPath?: string;
+  toPath?: string;
   isWorkspace?: boolean;
   children: IRelationContainer[] | IRelation[];
 }

@@ -1,8 +1,11 @@
+import * as path from "path";
 import * as vscode from "vscode";
 import * as nls from "vscode-nls";
 
-import { checkRelations } from "relation2-core";
+import { checkRelations, filterRelation, IRawRelation } from "relation2-core";
 import { IRelation, IRelationContainer } from "..";
+import insertRelation from "../core/insertRelation";
+import { context } from "../share";
 import { getNonce } from "../util";
 
 const localize = nls.loadMessageBundle();
@@ -92,12 +95,56 @@ export class RelationWebview {
         "node_modules",
         "relation2-page",
         "dist",
-        "bundle.js"
+        "relationView.js"
       )
     );
 
     // Use a nonce to whitelist which scripts can be run
     const nonce = getNonce();
+
+    webview.onDidReceiveMessage(({ type, payload }) => {
+      switch (type) {
+        case "submitCreateRelation":
+          const cwd = this.relation.workspaceFolderUri?.path;
+          if (cwd && this.relation.fromPath && this.relation.toPath) {
+            insertRelation({
+              fromPath: path.join(cwd, this.relation.fromPath),
+              toPath: path.join(cwd, this.relation.toPath),
+              fromRange: [+payload.fromStartLine, +payload.fromEndLine],
+              toRange: [+payload.toStartLine, +payload.toEndLine],
+            });
+          }
+          return;
+        case "relationDetailButtonClick":
+          new RelationWebview(context, { ...this.relation, id: payload.id });
+          return;
+        case "relationDeleteButtonClick":
+          (async () => {
+            const answer = await vscode.window.showWarningMessage(
+              `Do you want to delete relation ${payload.id}?`,
+              {
+                modal: true,
+              },
+              "Delete"
+            );
+
+            if (answer !== "Delete") {
+              return;
+            }
+
+            filterRelation(
+              (currentRelation: IRawRelation) => {
+                return currentRelation.id !== payload.id;
+              },
+              {
+                cwd: this.relation.workspaceFolderUri?.path,
+              }
+            );
+          })();
+
+          return;
+      }
+    });
 
     const relations = await checkRelations({
       cwd: this.relation?.workspaceFolderUri?.path,
@@ -154,13 +201,6 @@ export class RelationWebview {
         </script>
         <script nonce="${nonce}">
           window.i18nText = ${JSON.stringify(i18nText)};
-
-          // fix script tag in JSON content
-          const checkResultsJSONString = document.getElementById("relationText").innerHTML.trim();
-          window.checkResults = JSON.parse(checkResultsJSONString.replaceAll(
-            "<___REPLACE_SCRIPT_TAG____/script>",
-            "<" + "/script>"
-          ));
         </script>
         <script nonce="${nonce}">
           window.relationSearchParams = ${JSON.stringify({

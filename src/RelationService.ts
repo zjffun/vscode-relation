@@ -66,6 +66,7 @@ export class RelationService {
                 uri: relationJSONUri,
                 workspaceFolderUri: folder.uri,
                 fromPath,
+                toPath: children[0]?.toPath,
                 children: children.map((child) => {
                   return {
                     ...child,
