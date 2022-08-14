@@ -27,6 +27,10 @@ export class RelationFormWebview {
       }
     );
 
+    this.panel.onDidDispose(() => {
+      relationFormWebviewSingleton = null;
+    });
+
     this.getHtmlForWebview(this.panel.webview).then((html) => {
       this.panel.webview.html = html;
     });
