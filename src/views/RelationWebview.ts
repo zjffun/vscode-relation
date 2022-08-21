@@ -19,7 +19,9 @@ export class RelationWebview {
 
   constructor(
     private readonly context: vscode.ExtensionContext,
-    private readonly relation: IRelationContainer | IRelation
+    private readonly relation:
+      | IRelationContainer
+      | (IRelation & { detailMode?: boolean })
   ) {
     let subTitle = relation.name;
     if (!(relation as IRelationContainer).children) {
@@ -116,7 +118,11 @@ export class RelationWebview {
           }
           return;
         case "relationDetailButtonClick":
-          new RelationWebview(context, { ...this.relation, id: payload.id });
+          new RelationWebview(context, {
+            ...this.relation,
+            id: payload.id,
+            detailMode: true,
+          });
           return;
         case "relationDeleteButtonClick":
           (async () => {
@@ -148,6 +154,7 @@ export class RelationWebview {
 
     const relations = await checkRelations({
       cwd: this.relation?.workspaceFolderUri?.path,
+      fromPath: (this.relation as IRelation).fromPath,
     });
 
     const relationsJSONString = JSON.stringify(
@@ -206,6 +213,7 @@ export class RelationWebview {
           window.relationSearchParams = ${JSON.stringify({
             id: (this.relation as IRelation).id,
             fromPath: (this.relation as IRelation).fromPath,
+            detailMode: (this.relation as { detailMode: boolean }).detailMode,
           })}
         </script>
 				<script nonce="${nonce}" src="${scriptUri}"></script>

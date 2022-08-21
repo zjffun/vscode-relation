@@ -72,9 +72,12 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand(deleteRelationCommandId, (data) => {
-      deleteRelation(data);
-    })
+    vscode.commands.registerCommand(
+      deleteRelationCommandId,
+      (relation, relations) => {
+        deleteRelation(relation, relations);
+      }
+    )
   );
 
   context.subscriptions.push(

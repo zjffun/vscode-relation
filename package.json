@@ -55,12 +55,12 @@
       "view/item/context": [
         {
           "command": "_vscode-relation._showRelation",
-          "when": "viewItem == vscode-relation-relationExplorerView-workspace || viewItem == vscode-relation-relationExplorerView-file",
+          "when": "viewItem == vscode-relation-relationExplorerView-file",
           "group": "inline@1"
         },
         {
           "command": "_vscode-relation._deleteRelation",
-          "when": "viewItem == vscode-relation-relationExplorerView-file",
+          "when": "viewItem == vscode-relation-relationExplorerView-file || viewItem == vscode-relation-relationExplorerView-range",
           "group": "inline@2"
         }
       ],

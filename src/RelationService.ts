@@ -1,43 +1,12 @@
 import * as _ from "lodash";
 import * as vscode from "vscode";
-import { IRelation, IRelationContainer } from ".";
+import { IRelationContainer } from ".";
 import { log } from "./extension";
 import { rangeToString } from "./util";
-import { refresh } from "./views/RelationExplorerView";
+import { getRawRelationWithDirty } from "relation2-core";
 
 export class RelationService {
-  private textDocument: vscode.TextDocument;
-
-  constructor(textDocument: vscode.TextDocument) {
-    this.textDocument = textDocument;
-  }
-
-  getList(): IRelation[] {
-    let result: any = [];
-
-    try {
-      result = JSON.parse(this.textDocument.getText());
-    } catch (error: any) {
-      log.appendLine(error?.message);
-    }
-
-    return result;
-  }
-
-  static async getRelationsByUri(uri: vscode.Uri) {
-    let textDoc = await vscode.workspace.openTextDocument(uri);
-
-    const relationService = new RelationService(textDoc);
-
-    let relations: IRelation[] = [];
-    try {
-      relations = await relationService.getList();
-    } catch (error: any) {
-      log.appendLine(error?.message);
-    }
-
-    return relations;
-  }
+  constructor() {}
 
   static async getTree() {
     const workspaceFolders = vscode.workspace.workspaceFolders;
@@ -53,24 +22,29 @@ export class RelationService {
 
         let relationContainers: IRelationContainer[] = [];
         try {
-          const relations = await RelationService.getRelationsByUri(
-            relationJSONUri
-          );
+          const relations = await getRawRelationWithDirty({
+            cwd: folder.uri.path,
+          });
 
           const relationsGroupByFromPath = _.groupBy(relations, "fromPath");
 
           relationContainers = Object.entries(relationsGroupByFromPath).map(
             ([fromPath, children]) => {
+              const dirty = children.some((child) => child.dirty);
+
               return {
-                name: fromPath,
+                name: `${dirty ? "*" : ""}${fromPath}`,
                 uri: relationJSONUri,
                 workspaceFolderUri: folder.uri,
                 fromPath,
                 toPath: children[0]?.toPath,
+                dirty,
                 children: children.map((child) => {
                   return {
                     ...child,
-                    name: rangeToString(child.fromRange),
+                    name: `${child.dirty ? "*" : ""}${rangeToString(
+                      child.fromRange
+                    )}`,
                     workspaceFolderUri: folder.uri,
                   };
                 }),

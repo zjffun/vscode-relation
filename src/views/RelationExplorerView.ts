@@ -19,6 +19,7 @@ export default class RelationExplorerView
     vscode.window.createTreeView(RelationExplorerView.viewId, {
       treeDataProvider: this,
       showCollapseAll: true,
+      canSelectMany: true,
     });
 
     relationExplorerView = this;
@@ -51,10 +52,13 @@ export default class RelationExplorerView
       };
     }
 
+    contextValue = "vscode-relation-relationExplorerView-range";
+
     return {
       label: element.name,
       command: showRelationCommand,
       collapsibleState: undefined,
+      contextValue,
     };
   }
 
