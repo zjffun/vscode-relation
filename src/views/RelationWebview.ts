@@ -2,7 +2,15 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as nls from "vscode-nls";
 
-import { checkRelations, filterRelation, IRawRelation } from "relation2-core";
+import { pick } from "lodash";
+import {
+  checkRelations,
+  filterRelation,
+  getKey,
+  getOriginalAndModifiedContent,
+  IRawRelation,
+} from "relation2-core";
+import stringifyJsonScriptContent from "stringify-json-script-content";
 import { IRelation, IRelationContainer } from "..";
 import insertRelation from "../core/insertRelation";
 import { context } from "../share";
@@ -97,7 +105,7 @@ export class RelationWebview {
         "node_modules",
         "relation2-page",
         "dist",
-        "relationView.js"
+        "relationPreviewView.js"
       )
     );
 
@@ -152,19 +160,36 @@ export class RelationWebview {
       }
     });
 
-    const relations = await checkRelations({
+    const relationsKey = getKey(this.relation as IRelation);
+
+    const checkResults = await checkRelations({
       cwd: this.relation?.workspaceFolderUri?.path,
-      fromPath: (this.relation as IRelation).fromPath,
+      relationsKey,
     });
 
-    const relationsJSONString = JSON.stringify(
-      Array.from(relations.values()),
-      (key, value: any) => {
-        if (value instanceof Map) {
-          return Array.from(value.entries());
-        }
-        return value;
-      },
+    const originalAndModifiedContent = await getOriginalAndModifiedContent({
+      cwd: this.relation?.workspaceFolderUri?.path,
+      relationsKey,
+      checkResults: checkResults,
+    });
+
+    const viewCheckResults = {
+      key: relationsKey,
+      checkResults,
+      ...pick(checkResults[0], [
+        "fromPath",
+        "fromBaseDir",
+        "toPath",
+        "toBaseDir",
+        "currentFromRev",
+        "currentToRev",
+      ]),
+      originalAndModifiedContent,
+    };
+
+    const escapedViewCheckResultsJSONString = stringifyJsonScriptContent(
+      viewCheckResults,
+      null,
       2
     );
 
@@ -200,11 +225,8 @@ export class RelationWebview {
 				<div id="root">
           <vscode-progress-ring></vscode-progress-ring>
         </div>
-        <script id="relationText" type="text">
-          ${relationsJSONString.replaceAll(
-            "</script>",
-            "<___REPLACE_SCRIPT_TAG____/script>"
-          )}
+        <script id="viewCheckResultsText" type="application/json">
+          ${escapedViewCheckResultsJSONString}
         </script>
         <script nonce="${nonce}">
           window.i18nText = ${JSON.stringify(i18nText)};
@@ -212,7 +234,7 @@ export class RelationWebview {
         <script nonce="${nonce}">
           window.relationSearchParams = ${JSON.stringify({
             id: (this.relation as IRelation).id,
-            fromPath: (this.relation as IRelation).fromPath,
+            relationsKey,
             detailMode: (this.relation as { detailMode: boolean }).detailMode,
           })}
         </script>

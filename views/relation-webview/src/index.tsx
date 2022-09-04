@@ -1,17 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-const checkResultsJSONString = document
-  .getElementById("relationText")!
-  .innerHTML.trim();
+const checkResultsJSONString =
+  document.getElementById("viewCheckResultsText")!.textContent || "";
 
-// fix script tag in JSON content
-(window as any).checkResults = JSON.parse(
-  checkResultsJSONString.replaceAll(
-    "<___REPLACE_SCRIPT_TAG____/script>",
-    "<" + "/script>"
-  )
-);
+(window as any).__VIEW_CHECK_RESULTS__ = JSON.parse(checkResultsJSONString);
 
 document.addEventListener("submitCreateRelation", (event: any) => {
   window.vsCodeApi.postMessage({

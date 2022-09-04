@@ -36,6 +36,8 @@ export class RelationService {
                 name: `${dirty ? "*" : ""}${fromPath}`,
                 uri: relationJSONUri,
                 workspaceFolderUri: folder.uri,
+                fromBaseDir: children[0]?.fromBaseDir,
+                toBaseDir: children[0]?.toBaseDir,
                 fromPath,
                 toPath: children[0]?.toPath,
                 dirty,
