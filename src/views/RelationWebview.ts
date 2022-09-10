@@ -9,6 +9,8 @@ import {
   getKey,
   getOriginalAndModifiedContent,
   IRawRelation,
+  updateRelation,
+  GitServer,
 } from "relation2-core";
 import stringifyJsonScriptContent from "stringify-json-script-content";
 import { IRelation, IRelationContainer } from "..";
@@ -99,66 +101,8 @@ export class RelationWebview {
       )
     );
 
-    const relationScriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this.context.extensionUri,
-        "node_modules",
-        "relation2-page",
-        "dist",
-        "relationPreviewView.js"
-      )
-    );
-
     // Use a nonce to whitelist which scripts can be run
     const nonce = getNonce();
-
-    webview.onDidReceiveMessage(({ type, payload }) => {
-      switch (type) {
-        case "submitCreateRelation":
-          const cwd = this.relation.workspaceFolderUri?.path;
-          if (cwd && this.relation.fromPath && this.relation.toPath) {
-            insertRelation({
-              fromPath: path.join(cwd, this.relation.fromPath),
-              toPath: path.join(cwd, this.relation.toPath),
-              fromRange: [+payload.fromStartLine, +payload.fromEndLine],
-              toRange: [+payload.toStartLine, +payload.toEndLine],
-            });
-          }
-          return;
-        case "relationDetailButtonClick":
-          new RelationWebview(context, {
-            ...this.relation,
-            id: payload.id,
-            detailMode: true,
-          });
-          return;
-        case "relationDeleteButtonClick":
-          (async () => {
-            const answer = await vscode.window.showWarningMessage(
-              `Do you want to delete relation ${payload.id}?`,
-              {
-                modal: true,
-              },
-              "Delete"
-            );
-
-            if (answer !== "Delete") {
-              return;
-            }
-
-            filterRelation(
-              (currentRelation: IRawRelation) => {
-                return currentRelation.id !== payload.id;
-              },
-              {
-                cwd: this.relation.workspaceFolderUri?.path,
-              }
-            );
-          })();
-
-          return;
-      }
-    });
 
     const relationsKey = getKey(this.relation as IRelation);
 
@@ -193,6 +137,162 @@ export class RelationWebview {
       2
     );
 
+    webview.onDidReceiveMessage(({ type, payload }) => {
+      (async () => {
+        const cwd = this.relation.workspaceFolderUri?.path;
+        switch (type) {
+          case "submitCreateRelation":
+            if (cwd && this.relation.fromPath && this.relation.toPath) {
+              insertRelation({
+                fromPath: path.join(cwd, this.relation.fromPath),
+                toPath: path.join(cwd, this.relation.toPath),
+                fromRange: [+payload.fromStartLine, +payload.fromEndLine],
+                toRange: [+payload.toStartLine, +payload.toEndLine],
+              });
+            }
+            return;
+          case "relationDetailButtonClick":
+            new RelationWebview(context, {
+              ...this.relation,
+              id: payload.id,
+              detailMode: true,
+            });
+            return;
+          case "relationDeleteButtonClick": {
+            const answer = await vscode.window.showWarningMessage(
+              `Do you want to delete relation ${payload.id}?`,
+              {
+                modal: true,
+              },
+              "Delete"
+            );
+
+            if (answer !== "Delete") {
+              return;
+            }
+
+            filterRelation(
+              (currentRelation: IRawRelation) => {
+                return currentRelation.id !== payload.id;
+              },
+              {
+                cwd,
+              }
+            );
+            return;
+          }
+
+          case "relationUpdateFromClick": {
+            const checkResult = checkResults.find((d) => d.id === payload.id);
+
+            if (!checkResult) {
+              return;
+            }
+
+            const fromRev = await GitServer.parseRev(
+              cwd,
+              "HEAD",
+              checkResult.fromBaseDir
+            );
+
+            const answer = await vscode.window.showWarningMessage(
+              `Do you want to update ${payload.id} fromRev to HEAD(${fromRev})?`,
+              {
+                modal: true,
+              },
+              "Yes"
+            );
+
+            if (answer !== "Yes") {
+              return;
+            }
+
+            updateRelation({
+              cwd,
+              id: payload.id,
+              fromRev,
+              fromRange: checkResult.fromModifiedRange,
+            });
+            return;
+          }
+          case "relationUpdateToClick": {
+            const checkResult = checkResults.find((d) => d.id === payload.id);
+
+            if (!checkResult) {
+              return;
+            }
+
+            const toRev = await GitServer.parseRev(
+              cwd,
+              "HEAD",
+              checkResult.toBaseDir
+            );
+
+            const answer = await vscode.window.showWarningMessage(
+              `Do you want to update ${payload.id} toRev to HEAD(${toRev})?`,
+              {
+                modal: true,
+              },
+              "Yes"
+            );
+
+            if (answer !== "Yes") {
+              return;
+            }
+
+            updateRelation({
+              cwd,
+              id: payload.id,
+              toRev,
+              toRange: checkResult.toModifiedRange,
+            });
+            return;
+          }
+          case "relationUpdateBothClick": {
+            const checkResult = checkResults.find((d) => d.id === payload.id);
+
+            if (!checkResult) {
+              return;
+            }
+
+            const fromRev = await GitServer.parseRev(
+              cwd,
+              "HEAD",
+              checkResult.fromBaseDir
+            );
+
+            const toRev = await GitServer.parseRev(
+              cwd,
+              "HEAD",
+              checkResult.toBaseDir
+            );
+
+            const answer = await vscode.window.showWarningMessage(
+              `Do you want to update ${payload.id} fromRev to HEAD(${fromRev} and toRev to HEAD(${toRev})?`,
+              {
+                modal: true,
+              },
+              "Yes"
+            );
+
+            if (answer !== "Yes") {
+              return;
+            }
+
+            updateRelation({
+              cwd,
+              id: payload.id,
+              fromRev,
+              toRev,
+              fromRange: checkResult.fromModifiedRange,
+              toRange: checkResult.toModifiedRange,
+            });
+            return;
+          }
+        }
+      })();
+    });
+
     return /* html */ `
 			<!DOCTYPE html>
 			<html lang="en">
@@ -214,7 +314,7 @@ export class RelationWebview {
 				<link href="${codiconsUri}" rel="stylesheet" />
 				<link href="${styleResetUri}" rel="stylesheet" />
 				<link href="${styleVSCodeUri}" rel="stylesheet" />
-				<!-- <link href="${styleUri}" rel="stylesheet" /> -->
+				<link href="${styleUri}" rel="stylesheet" />
 
         <script nonce="${nonce}" src="${globalErrorHandlerUri}"></script>
         <script type="module" nonce="${nonce}" src="${toolkitUri}"></script>
@@ -239,7 +339,6 @@ export class RelationWebview {
           })}
         </script>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
-        <script nonce="${nonce}" src="${relationScriptUri}"></script>
 			</body>
 			</html>`;
   }

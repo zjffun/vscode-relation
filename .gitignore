@@ -1,8 +1,9 @@
 relation-check-result
-out-view
 test.temp
 .vscode-test
 /out
+/out-view
+/out-tests
 
 yarn.lock
 .DS_Store

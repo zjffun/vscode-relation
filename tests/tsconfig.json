@@ -1,12 +1,10 @@
 {
-  "include": ["src/**/*"],
   "compilerOptions": {
     "module": "commonjs",
     "target": "ESNext",
-    "outDir": "out",
+    "outDir": "../out-tests",
     "lib": ["ESNext"],
     "sourceMap": true,
-    "rootDir": "src",
     "strict": true,
     "forceConsistentCasingInFileNames": true
     /* Additional Checks */

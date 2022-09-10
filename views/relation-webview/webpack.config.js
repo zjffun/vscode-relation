@@ -2,6 +2,7 @@
 
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
 const webpack = require("webpack");
 
 const pkg = require("../../package.json");
@@ -27,6 +28,9 @@ const config = {
     clean: true,
   },
   plugins: [
+    new MonacoWebpackPlugin({
+      languages: ["markdown"],
+    }),
     new MiniCssExtractPlugin(),
     new webpack.BannerPlugin({
       banner,
@@ -35,12 +39,16 @@ const config = {
   module: {
     rules: [
       {
-        test: /\.(ts|tsx)$/i,
-        loader: "ts-loader",
-        exclude: ["/node_modules/"],
+        test: /\.css$/i,
+        use: [
+          // Creates `style` nodes from JS strings
+          MiniCssExtractPlugin.loader,
+          // Translates CSS into CommonJS
+          "css-loader",
+        ],
       },
       {
-        test: /\.s[ac]ss$/i,
+        test: /\.scss$/i,
         use: [
           // Creates `style` nodes from JS strings
           MiniCssExtractPlugin.loader,
@@ -49,6 +57,11 @@ const config = {
           // Compiles Sass to CSS
           "sass-loader",
         ],
+      },
+      {
+        test: /\.(ts|tsx)$/i,
+        loader: "ts-loader",
+        exclude: ["/node_modules/"],
       },
     ],
   },
