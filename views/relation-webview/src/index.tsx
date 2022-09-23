@@ -1,11 +1,12 @@
+import classnames from "classnames";
 import { MouseEventHandler, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
+import { IViewData } from "relation2-core";
 import {
   getRelationByCheckResult,
   MonacoDiffEditorRelation,
 } from "relation2-react";
-import { IViewData } from "relation2-core";
 
 import "./index.scss";
 
@@ -120,6 +121,8 @@ const options = (data: any) => {
 };
 
 const Page = () => {
+  const [showOptions, setShowOptions] = useState(false);
+
   const [viewCheckResults, setviewCheckResults] = useState(
     (window as any).__VIEW_CHECK_RESULTS__ as IViewData
   );
@@ -130,21 +133,109 @@ const Page = () => {
     return null;
   }
 
+  const diffEditorRef = useRef<{
+    diffEditorRef?: any;
+  }>({});
+
   return (
-    <MonacoDiffEditorRelation
-      fromOriginal={
-        viewCheckResults.originalAndModifiedContent.fromOriginalContent
-      }
-      fromModified={
-        viewCheckResults.originalAndModifiedContent.fromModifiedContent
-      }
-      toOriginal={viewCheckResults.originalAndModifiedContent.toOriginalContent}
-      toModified={viewCheckResults.originalAndModifiedContent.toModifiedContent}
-      relations={viewCheckResults.checkResults.map((d: any) => {
-        return getRelationByCheckResult(d);
-      })}
-      options={options}
-    ></MonacoDiffEditorRelation>
+    <main className={"relation-overview"}>
+      <header className="relation-overview__header">
+        <ul className="relation-overview__header__list">
+          <li>
+            <button
+              onClick={() => {
+                window.vsCodeApi.postMessage({
+                  type: "relationResetRelationsClick",
+                });
+              }}
+            >
+              Reset Relations
+            </button>
+            <button
+              onClick={() => {
+                window.vsCodeApi.postMessage({
+                  type: "relationUpdateRelationsClick",
+                });
+              }}
+            >
+              Update Relations
+            </button>
+            <label>
+              <input
+                type="checkbox"
+                checked={showOptions}
+                onChange={(e) => setShowOptions(e.target.checked)}
+              />
+              Show Options
+            </label>
+            <button
+              onClick={() => {
+                window.vsCodeApi.postMessage({
+                  type: "relationOpenFromFileButtonClick",
+                });
+              }}
+            >
+              Open From File
+            </button>
+            <button
+              onClick={() => {
+                window.vsCodeApi.postMessage({
+                  type: "relationOpenToFileButtonClick",
+                });
+              }}
+            >
+              Open To File
+            </button>
+          </li>
+        </ul>
+      </header>
+      <section
+        className={classnames({
+          "relation-overview__relations": true,
+          "relation-overview__relations--show-options": showOptions,
+        })}
+      >
+        <MonacoDiffEditorRelation
+          fromOriginal={
+            viewCheckResults.originalAndModifiedContent.fromOriginalContent
+          }
+          fromModified={
+            viewCheckResults.originalAndModifiedContent.fromModifiedContent
+          }
+          toOriginal={
+            viewCheckResults.originalAndModifiedContent.toOriginalContent
+          }
+          toModified={
+            viewCheckResults.originalAndModifiedContent.toModifiedContent
+          }
+          relations={viewCheckResults.checkResults.map((d: any) => {
+            return getRelationByCheckResult(d);
+          })}
+          options={options}
+          ref={diffEditorRef}
+          onFromSave={(editor) => {
+            const content = editor?.getValue();
+
+            window.vsCodeApi.postMessage({
+              type: "relationFromSave",
+              payload: {
+                content,
+              },
+            });
+          }}
+          onToSave={(editor) => {
+            const content = editor?.getValue();
+
+            window.vsCodeApi.postMessage({
+              type: "relationToSave",
+              payload: {
+                content,
+              },
+            });
+          }}
+        ></MonacoDiffEditorRelation>
+      </section>
+    </main>
   );
 };
 

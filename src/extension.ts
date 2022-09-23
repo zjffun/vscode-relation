@@ -27,6 +27,7 @@ import createRelationFromRange, {
 import createRelationToRange, {
   createRelationToRangeCommandId,
 } from "./commands/createRelationToRange";
+import search, { searchCommandId } from "./commands/searchRelation";
 
 export const log = vscode.window.createOutputChannel("Relation");
 
@@ -78,6 +79,12 @@ export function activate(context: vscode.ExtensionContext) {
         deleteRelation(relation, relations);
       }
     )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(searchCommandId, () => {
+      search();
+    })
   );
 
   context.subscriptions.push(

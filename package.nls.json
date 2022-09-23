@@ -9,5 +9,6 @@
   "extension.refresh.title": "Refresh",
   "extension.relationView.title": "Relation",
   "extension.RelationExplorerView.name": "Relation",
-  "extension.HelpAndFeedback.name": "Help And Feedback"
+  "extension.HelpAndFeedback.name": "Help And Feedback",
+  "extension.search.title": "Search"
 }

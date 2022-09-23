@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { IRelation, IRelationContainer } from "..";
+import { IRelation, IRelationContainer, IRelationWorkspace } from "..";
 import { RelationService } from "../RelationService";
 import { log } from "../extension";
 import { showRelationCommandId } from "../commands/showRelation";
@@ -7,7 +7,10 @@ import { showRelationCommandId } from "../commands/showRelation";
 let relationExplorerView: RelationExplorerView;
 
 export default class RelationExplorerView
-  implements vscode.TreeDataProvider<IRelation | IRelationContainer>
+  implements
+    vscode.TreeDataProvider<
+      IRelation | IRelationContainer | IRelationWorkspace
+    >
 {
   public static viewId = "vscode-relation-relationsView-RelationExplorerView";
 
@@ -63,16 +66,20 @@ export default class RelationExplorerView
   }
 
   public getChildren(
-    element?: IRelation | IRelationContainer
+    element?: IRelation | IRelationContainer | IRelationWorkspace
   ):
     | IRelation[]
     | Thenable<IRelation[]>
     | IRelationContainer[]
-    | Thenable<IRelationContainer[]> {
+    | Thenable<IRelationContainer[]>
+    | IRelationWorkspace[]
+    | Thenable<IRelationWorkspace[]> {
     return element ? this.getTreeElement(element) : this.getTree();
   }
 
-  protected getTreeElement = (element: IRelation | IRelationContainer) => {
+  protected getTreeElement = (
+    element: IRelation | IRelationContainer | IRelationWorkspace
+  ) => {
     const _element = <IRelationContainer>element;
 
     if (!_element?.children) {

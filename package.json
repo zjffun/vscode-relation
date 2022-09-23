@@ -47,6 +47,11 @@
     "menus": {
       "view/title": [
         {
+          "command": "vscode-relation.search",
+          "when": "view == vscode-relation-relationsView-RelationExplorerView",
+          "group": "navigation@9"
+        },
+        {
           "command": "vscode-relation.refresh",
           "when": "view == vscode-relation-relationsView-RelationExplorerView",
           "group": "navigation@10"
@@ -123,6 +128,12 @@
         "title": "%extension.refresh.title%",
         "icon": "$(refresh)",
         "category": "Relation"
+      },
+      {
+        "command": "vscode-relation.search",
+        "title": "%extension.search.title%",
+        "icon": "$(search)",
+        "category": "Relation"
       }
     ],
     "customEditors": []
@@ -155,6 +166,7 @@
     "@types/vscode": "^1.59.0",
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
+    "classnames": "^2.3.1",
     "concurrently": "^6.3.0",
     "css-loader": "^6.4.0",
     "del": "^6.0.0",

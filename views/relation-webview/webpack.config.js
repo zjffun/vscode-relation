@@ -30,6 +30,7 @@ const config = {
   plugins: [
     new MonacoWebpackPlugin({
       languages: ["markdown"],
+      features: ["contextmenu"],
     }),
     new MiniCssExtractPlugin(),
     new webpack.BannerPlugin({

@@ -8,9 +8,10 @@ import {
   filterRelation,
   getKey,
   getOriginalAndModifiedContent,
-  IRawRelation,
-  updateRelation,
   GitServer,
+  IRawRelation,
+  resetRelation,
+  updateRelation,
 } from "relation2-core";
 import stringifyJsonScriptContent from "stringify-json-script-content";
 import { IRelation, IRelationContainer } from "..";
@@ -49,9 +50,12 @@ export class RelationWebview {
       }
     );
 
-    this.getHtmlForWebview(this.panel.webview).then((html) => {
-      this.panel.webview.html = html;
-    });
+    this.loadPage();
+  }
+
+  private async loadPage() {
+    const html = await this.getHtmlForWebview(this.panel.webview);
+    this.panel.webview.html = html;
   }
 
   private async getHtmlForWebview(webview: vscode.Webview): Promise<string> {
@@ -287,6 +291,164 @@ export class RelationWebview {
               fromRange: checkResult.fromModifiedRange,
               toRange: checkResult.toModifiedRange,
             });
+            return;
+          }
+          case "relationUpdateRelationsClick": {
+            const checkResult = checkResults[0];
+
+            if (!checkResult) {
+              return;
+            }
+
+            const fromRev = await GitServer.parseRev(
+              cwd,
+              "HEAD",
+              checkResult.fromBaseDir
+            );
+
+            const toRev = await GitServer.parseRev(
+              cwd,
+              "HEAD",
+              checkResult.toBaseDir
+            );
+
+            const answer = await vscode.window.showWarningMessage(
+              `Do you want to update relations fromRev to HEAD(${fromRev} and toRev to HEAD(${toRev})?`,
+              {
+                modal: true,
+              },
+              "Yes"
+            );
+
+            if (answer !== "Yes") {
+              return;
+            }
+
+            for (const checkResult of checkResults) {
+              await updateRelation({
+                cwd,
+                id: checkResult.id,
+                fromRev,
+                toRev,
+                fromRange: checkResult.fromModifiedRange,
+                toRange: checkResult.toModifiedRange,
+              });
+            }
+
+            await this.loadPage();
+
+            return;
+          }
+
+          case "relationToSave": {
+            const relation = this.relation as IRelation;
+
+            if (
+              relation.workspaceFolderUri &&
+              relation.toBaseDir &&
+              relation.toPath
+            ) {
+              await vscode.workspace.fs.writeFile(
+                vscode.Uri.joinPath(
+                  relation.workspaceFolderUri,
+                  relation.toBaseDir,
+                  relation.toPath
+                ),
+                Uint8Array.from(Buffer.from(payload.content))
+              );
+            }
+
+            this.loadPage();
+
+            return;
+          }
+          case "relationFromSave": {
+            const relation = this.relation as IRelation;
+
+            if (
+              relation.workspaceFolderUri &&
+              relation.fromBaseDir &&
+              relation.fromPath
+            ) {
+              await vscode.workspace.fs.writeFile(
+                vscode.Uri.joinPath(
+                  relation.workspaceFolderUri,
+                  relation.fromBaseDir,
+                  relation.fromPath
+                ),
+                Uint8Array.from(Buffer.from(payload.content))
+              );
+            }
+
+            this.loadPage();
+
+            return;
+          }
+
+          case "relationResetRelationsClick": {
+            const relation = this.relation as IRelation;
+
+            const answer = await vscode.window.showWarningMessage(
+              `Do you want to update relations?`,
+              {
+                modal: true,
+              },
+              "Yes"
+            );
+
+            if (answer !== "Yes") {
+              return;
+            }
+
+            if (relation.workspaceFolderUri) {
+              resetRelation({
+                ...checkResults[0],
+                cwd: relation.workspaceFolderUri.path,
+              });
+            }
+
+            return;
+          }
+
+          case "relationOpenFromFileButtonClick": {
+            const relation = this.relation as IRelation;
+
+            if (
+              relation.workspaceFolderUri &&
+              relation.fromBaseDir &&
+              relation.fromPath
+            ) {
+              vscode.commands.executeCommand(
+                "vscode.open",
+                vscode.Uri.joinPath(
+                  relation.workspaceFolderUri,
+                  relation.fromBaseDir,
+                  relation.fromPath
+                )
+              );
+            }
+
+            return;
+          }
+
+          case "relationOpenToFileButtonClick": {
+            const relation = this.relation as IRelation;
+
+            if (
+              relation.workspaceFolderUri &&
+              relation.toBaseDir &&
+              relation.toPath
+            ) {
+              vscode.commands.executeCommand(
+                "vscode.open",
+                vscode.Uri.joinPath(
+                  relation.workspaceFolderUri,
+                  relation.toBaseDir,
+                  relation.toPath
+                )
+              );
+            }
+
             return;
           }
         }

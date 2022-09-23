@@ -1,16 +1,16 @@
 import * as _ from "lodash";
 import * as vscode from "vscode";
-import { IRelationContainer } from ".";
+import { IRelationContainer, IRelationWorkspace } from ".";
 import { log } from "./extension";
 import { rangeToString } from "./util";
-import { getRawRelationWithDirty } from "relation2-core";
+import { readRelation } from "relation2-core";
 
 export class RelationService {
   constructor() {}
 
   static async getTree() {
     const workspaceFolders = vscode.workspace.workspaceFolders;
-    const tree: IRelationContainer[] = [];
+    const tree: IRelationWorkspace[] = [];
 
     if (workspaceFolders) {
       for (const folder of workspaceFolders) {
@@ -22,7 +22,7 @@ export class RelationService {
 
         let relationContainers: IRelationContainer[] = [];
         try {
-          const relations = await getRawRelationWithDirty({
+          const relations = await readRelation({
             cwd: folder.uri.path,
           });
 
@@ -30,6 +30,7 @@ export class RelationService {
 
           relationContainers = Object.entries(relationsGroupByFromPath).map(
             ([fromPath, children]) => {
+              // @ts-ignore
               const dirty = children.some((child) => child.dirty);
 
               return {
@@ -44,6 +45,7 @@ export class RelationService {
                 children: children.map((child) => {
                   return {
                     ...child,
+                    // @ts-ignore
                     name: `${child.dirty ? "*" : ""}${rangeToString(
                       child.fromRange
                     )}`,
@@ -69,5 +71,17 @@ export class RelationService {
     }
 
     return tree;
+  }
+
+  static async getList() {
+    const tree = await RelationService.getTree();
+
+    const containers = [];
+
+    for (const workspace of tree) {
+      containers.push(...workspace.children);
+    }
+
+    return containers;
   }
 }

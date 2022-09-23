@@ -9,5 +9,6 @@
   "extension.refresh.title": "刷新",
   "extension.relationView.title": "联系",
   "extension.RelationExplorerView.name": "联系",
-  "extension.HelpAndFeedback.name": "帮助和反馈"
+  "extension.HelpAndFeedback.name": "帮助和反馈",
+  "extension.search.title": "搜索"
 }

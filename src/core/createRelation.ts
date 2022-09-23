@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { createRelations } from "relation2-core";
+import { createRelationsAndSave } from "relation2-core";
 
 export default async ({
   fromPath,
@@ -34,7 +34,7 @@ export default async ({
   );
 
   if (result === "Yes") {
-    await createRelations({
+    await createRelationsAndSave({
       cwd,
       fromPath: fromPath,
       toPath: toPath,
