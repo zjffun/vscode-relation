@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { IViewData } from "relation2-core";
 import {
+  CreateMode,
   getRelationByCheckResult,
   MonacoDiffEditorRelation,
 } from "relation2-react";
@@ -186,6 +187,14 @@ const Page = () => {
             >
               Open To File
             </button>
+            <CreateMode
+              onCreate={(data) => {
+                window.vsCodeApi.postMessage({
+                  type: "submitCreateRelation",
+                  payload: data,
+                });
+              }}
+            />
           </li>
         </ul>
       </header>

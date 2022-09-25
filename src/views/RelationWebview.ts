@@ -345,7 +345,7 @@ export class RelationWebview {
 
             if (
               relation.workspaceFolderUri &&
-              relation.toBaseDir &&
+              relation.toBaseDir !== undefined &&
               relation.toPath
             ) {
               await vscode.workspace.fs.writeFile(
@@ -367,7 +367,7 @@ export class RelationWebview {
 
             if (
               relation.workspaceFolderUri &&
-              relation.fromBaseDir &&
+              relation.fromBaseDir !== undefined &&
               relation.fromPath
             ) {
               await vscode.workspace.fs.writeFile(
