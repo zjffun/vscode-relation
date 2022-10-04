@@ -3,11 +3,7 @@ import { MouseEventHandler, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { IViewData } from "relation2-core";
-import {
-  CreateMode,
-  getRelationByCheckResult,
-  MonacoDiffEditorRelation,
-} from "relation2-react";
+import { CreateMode, RelationEditor } from "relation2-react";
 
 import "./index.scss";
 
@@ -204,22 +200,11 @@ const Page = () => {
           "relation-overview__relations--show-options": showOptions,
         })}
       >
-        <MonacoDiffEditorRelation
-          fromOriginal={
-            viewCheckResults.originalAndModifiedContent.fromOriginalContent
+        <RelationEditor
+          checkResults={viewCheckResults.checkResults}
+          originalAndModifiedContent={
+            viewCheckResults.originalAndModifiedContent
           }
-          fromModified={
-            viewCheckResults.originalAndModifiedContent.fromModifiedContent
-          }
-          toOriginal={
-            viewCheckResults.originalAndModifiedContent.toOriginalContent
-          }
-          toModified={
-            viewCheckResults.originalAndModifiedContent.toModifiedContent
-          }
-          relations={viewCheckResults.checkResults.map((d: any) => {
-            return getRelationByCheckResult(d);
-          })}
           options={options}
           ref={diffEditorRef}
           onFromSave={(editor) => {
@@ -242,7 +227,7 @@ const Page = () => {
               },
             });
           }}
-        ></MonacoDiffEditorRelation>
+        />
       </section>
     </main>
   );
