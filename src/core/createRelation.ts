@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { createRelationsAndSave } from "relation2-core";
+import { RelationServer } from "relation2-core";
 
 export default async ({
   fromPath,
@@ -34,13 +34,17 @@ export default async ({
   );
 
   if (result === "Yes") {
-    await createRelationsAndSave({
-      cwd,
-      fromPath: fromPath,
-      toPath: toPath,
-      fromRev: !fromRev ? "HEAD" : fromRev,
-      toRev: !toRev ? "HEAD" : toRev,
-    });
+    const relationServer = new RelationServer(cwd);
+
+    relationServer.write([
+      ...relationServer.read(),
+      ...(await relationServer.createMarkdownRelations({
+        fromPath: fromPath,
+        toPath: toPath,
+        fromRev: !fromRev ? "HEAD" : fromRev,
+        toRev: !toRev ? "HEAD" : toRev,
+      })),
+    ]);
 
     return true;
   }

@@ -126,7 +126,7 @@ const Page = () => {
 
   const [showingRelation, setShowingRelation] = useState(searchParams.id);
 
-  if (!viewCheckResults?.originalAndModifiedContent) {
+  if (!viewCheckResults?.fileContents) {
     return null;
   }
 
@@ -152,6 +152,9 @@ const Page = () => {
               onClick={() => {
                 window.vsCodeApi.postMessage({
                   type: "relationUpdateRelationsClick",
+                  payload: {
+                    checkResults: viewCheckResults.checkResults,
+                  },
                 });
               }}
             >
@@ -202,9 +205,7 @@ const Page = () => {
       >
         <RelationEditor
           checkResults={viewCheckResults.checkResults}
-          originalAndModifiedContent={
-            viewCheckResults.originalAndModifiedContent
-          }
+          fileContents={viewCheckResults.fileContents}
           options={options}
           ref={diffEditorRef}
           onFromSave={(editor) => {

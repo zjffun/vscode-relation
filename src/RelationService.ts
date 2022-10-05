@@ -1,9 +1,9 @@
 import * as _ from "lodash";
+import { RelationServer } from "relation2-core";
 import * as vscode from "vscode";
 import { IRelationContainer, IRelationWorkspace } from ".";
 import { log } from "./extension";
 import { rangeToString } from "./util";
-import { readRelation } from "relation2-core";
 
 export class RelationService {
   constructor() {}
@@ -22,9 +22,8 @@ export class RelationService {
 
         let relationContainers: IRelationContainer[] = [];
         try {
-          const relations = await readRelation({
-            cwd: folder.uri.path,
-          });
+          const relationServer = new RelationServer(folder.uri.path);
+          const relations = await relationServer.read();
 
           const relationsGroupByFromPath = _.groupBy(relations, "fromPath");
 

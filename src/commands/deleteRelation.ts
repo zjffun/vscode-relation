@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { filterRelation, IRawRelation } from "relation2-core";
+import { IRawRelation, RelationServer } from "relation2-core";
 import { IRelation, IRelationContainer } from "..";
 
 export const deleteRelationCommandId = "_vscode-relation._deleteRelation";
@@ -9,6 +9,11 @@ export default async (
   relation: IRelationContainer | IRelation,
   relations?: IRelationContainer[] | IRelation[]
 ) => {
+  if (!relation.workspaceFolderUri?.path) {
+    return;
+  }
+
+  const relationServer = new RelationServer(relation.workspaceFolderUri?.path);
   const multiple = relations?.some?.((r) => r === relation);
 
   if (!multiple) {
@@ -24,18 +29,17 @@ export default async (
       return;
     }
 
-    filterRelation(
-      (currentRelation: IRawRelation) => {
+    relationServer.write(
+      relationServer.filter((currentRelation: IRawRelation) => {
         if ((relation as IRelationContainer).children) {
           return currentRelation.fromPath !== relation.fromPath;
         } else {
           return currentRelation.id !== (relation as IRelation).id;
         }
-      },
-      {
-        cwd: relation.workspaceFolderUri?.path,
-      }
+      })
     );
+
+    return true;
   }
 
   const answer = await vscode.window.showWarningMessage(
@@ -50,8 +54,8 @@ export default async (
     return;
   }
 
-  filterRelation(
-    (currentRelation: IRawRelation) => {
+  relationServer.write(
+    relationServer.filter((currentRelation: IRawRelation) => {
       return !relations!.some((relation) => {
         if ((relation as IRelationContainer).children) {
           return currentRelation.fromPath === relation.fromPath;
@@ -59,10 +63,7 @@ export default async (
           return currentRelation.id === (relation as IRelation).id;
         }
       });
-    },
-    {
-      cwd: relation.workspaceFolderUri?.path,
-    }
+    })
   );
 
   return true;

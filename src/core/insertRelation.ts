@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { insertRelation } from "relation2-core";
+import { RelationServer } from "relation2-core";
 import { rangeToString } from "../util";
 
 export default async ({
@@ -41,15 +41,19 @@ export default async ({
   );
 
   if (result === "Yes") {
-    await insertRelation({
-      cwd,
-      fromPath: fromPath,
-      toPath: toPath,
-      fromRev: !fromRev ? "HEAD" : fromRev,
-      toRev: !toRev ? "HEAD" : toRev,
-      fromRange,
-      toRange,
-    });
+    const relationServer = new RelationServer(cwd);
+
+    relationServer.write([
+      ...relationServer.read(),
+      await relationServer.create({
+        fromPath: fromPath,
+        toPath: toPath,
+        fromRev: !fromRev ? "HEAD" : fromRev,
+        toRev: !toRev ? "HEAD" : toRev,
+        fromRange,
+        toRange,
+      }),
+    ]);
 
     return true;
   }

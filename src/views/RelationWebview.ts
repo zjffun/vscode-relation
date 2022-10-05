@@ -4,14 +4,10 @@ import * as nls from "vscode-nls";
 
 import { pick } from "lodash";
 import {
-  checkRelations,
-  filterRelation,
   getKey,
-  getOriginalAndModifiedContent,
   GitServer,
   IRawRelation,
-  resetRelation,
-  updateRelation,
+  RelationServer,
 } from "relation2-core";
 import stringifyJsonScriptContent from "stringify-json-script-content";
 import { IRelation, IRelationContainer } from "..";
@@ -108,18 +104,19 @@ export class RelationWebview {
     // Use a nonce to whitelist which scripts can be run
     const nonce = getNonce();
 
+    const relationServer = new RelationServer(
+      this.relation?.workspaceFolderUri?.path
+    );
+
     const relationsKey = getKey(this.relation as IRelation);
 
-    const checkResults = await checkRelations({
-      cwd: this.relation?.workspaceFolderUri?.path,
-      relationsKey,
-    });
+    const checkResults = await relationServer.filterByRelationsKey(
+      relationsKey
+    );
 
-    const originalAndModifiedContent = await getOriginalAndModifiedContent({
-      cwd: this.relation?.workspaceFolderUri?.path,
-      relationsKey,
-      checkResults: checkResults,
-    });
+    const fileContents = await relationServer.getFileContentsByKey(
+      relationsKey
+    );
 
     const viewCheckResults = {
       key: relationsKey,
@@ -132,7 +129,7 @@ export class RelationWebview {
         "currentFromRev",
         "currentToRev",
       ]),
-      originalAndModifiedContent,
+      fileContents,
     };
 
     const escapedViewCheckResultsJSONString = stringifyJsonScriptContent(
@@ -175,14 +172,12 @@ export class RelationWebview {
               return;
             }
 
-            filterRelation(
-              (currentRelation: IRawRelation) => {
+            relationServer.write(
+              relationServer.filter((currentRelation: IRawRelation) => {
                 return currentRelation.id !== payload.id;
-              },
-              {
-                cwd,
-              }
+              })
             );
+
             return;
           }
 
@@ -211,12 +206,11 @@ export class RelationWebview {
               return;
             }
 
-            updateRelation({
-              cwd,
-              id: payload.id,
+            relationServer.updateById(payload.id, {
               fromRev,
-              fromRange: checkResult.fromModifiedRange,
+              fromRange: payload.fromModifiedRange,
             });
+
             return;
           }
           case "relationUpdateToClick": {
@@ -244,12 +238,11 @@ export class RelationWebview {
               return;
             }
 
-            updateRelation({
-              cwd,
-              id: payload.id,
+            relationServer.updateById(payload.id, {
               toRev,
-              toRange: checkResult.toModifiedRange,
+              toRange: payload.toModifiedRange,
             });
+
             return;
           }
           case "relationUpdateBothClick": {
@@ -283,14 +276,13 @@ export class RelationWebview {
               return;
             }
 
-            updateRelation({
-              cwd,
-              id: payload.id,
+            relationServer.updateById(payload.id, {
               fromRev,
               toRev,
-              fromRange: checkResult.fromModifiedRange,
-              toRange: checkResult.toModifiedRange,
+              fromRange: payload.fromModifiedRange,
+              toRange: payload.toModifiedRange,
             });
+
             return;
           }
           case "relationUpdateRelationsClick": {
@@ -324,10 +316,8 @@ export class RelationWebview {
               return;
             }
 
-            for (const checkResult of checkResults) {
-              await updateRelation({
-                cwd,
-                id: checkResult.id,
+            for (const checkResult of payload.checkResults) {
+              relationServer.updateById(checkResult.id, {
                 fromRev,
                 toRev,
                 fromRange: checkResult.fromModifiedRange,
@@ -346,7 +336,7 @@ export class RelationWebview {
             if (
               relation.workspaceFolderUri &&
               relation.toBaseDir !== undefined &&
-              relation.toPath
+              relation.toPath !== undefined
             ) {
               await vscode.workspace.fs.writeFile(
                 vscode.Uri.joinPath(
@@ -368,7 +358,7 @@ export class RelationWebview {
             if (
               relation.workspaceFolderUri &&
               relation.fromBaseDir !== undefined &&
-              relation.fromPath
+              relation.fromPath !== undefined
             ) {
               await vscode.workspace.fs.writeFile(
                 vscode.Uri.joinPath(
@@ -400,12 +390,29 @@ export class RelationWebview {
               return;
             }
 
-            if (relation.workspaceFolderUri) {
-              resetRelation({
-                ...checkResults[0],
-                cwd: relation.workspaceFolderUri.path,
-              });
+            if (cwd) {
+              const filteredRelations = relationServer.filter(
+                (tempRelation) => {
+                  return getKey(tempRelation) !== getKey(relation);
+                }
+              );
+              const newRelations = await relationServer.createMarkdownRelations(
+                {
+                  fromRev: "HEAd",
+                  fromPath: path.join(
+                    cwd,
+                    relation.fromBaseDir,
+                    relation.fromPath
+                  ),
+                  toRev: "HEAD",
+                  toPath: path.join(cwd, relation.toBaseDir, relation.toPath),
+                }
+              );
+
+              relationServer.write([...filteredRelations, ...newRelations]);
             }
+
+            this.loadPage();
 
             return;
           }
@@ -415,8 +422,8 @@ export class RelationWebview {
 
             if (
               relation.workspaceFolderUri &&
-              relation.fromBaseDir &&
-              relation.fromPath
+              relation.fromBaseDir !== undefined &&
+              relation.fromPath !== undefined
             ) {
               vscode.commands.executeCommand(
                 "vscode.open",
@@ -436,8 +443,8 @@ export class RelationWebview {
 
             if (
               relation.workspaceFolderUri &&
-              relation.toBaseDir &&
-              relation.toPath
+              relation.toBaseDir !== undefined &&
+              relation.toPath !== undefined
             ) {
               vscode.commands.executeCommand(
                 "vscode.open",
