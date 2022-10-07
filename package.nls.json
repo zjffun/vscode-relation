@@ -6,9 +6,9 @@
   "extension.createRelationFromRange.title": "Create Relation From This Range",
   "extension.createRelationToRange.title": "Create Relation To This Range",
   "extension.deleteRelation.title": "Delete Relation",
-  "extension.refresh.title": "Refresh",
+  "extension.refresh.title": "Refresh Relation",
   "extension.relationView.title": "Relation",
   "extension.RelationExplorerView.name": "Relation",
   "extension.HelpAndFeedback.name": "Help And Feedback",
-  "extension.search.title": "Search"
+  "extension.search.title": "Search Relation"
 }

@@ -90,6 +90,36 @@
           "when": "editorHasSelection",
           "group": "relation"
         }
+      ],
+      "commandPalette": [
+        {
+          "command": "_vscode-relation._showRelation",
+          "when": "false"
+        },
+        {
+          "command": "_vscode-relation.createRelation",
+          "when": "false"
+        },
+        {
+          "command": "_vscode-relation._createRelationFrom",
+          "when": "false"
+        },
+        {
+          "command": "_vscode-relation._createRelationTo",
+          "when": "false"
+        },
+        {
+          "command": "_vscode-relation._createRelationFromRange",
+          "when": "false"
+        },
+        {
+          "command": "_vscode-relation._createRelationToRange",
+          "when": "false"
+        },
+        {
+          "command": "_vscode-relation._deleteRelation",
+          "when": "false"
+        }
       ]
     },
     "commands": [

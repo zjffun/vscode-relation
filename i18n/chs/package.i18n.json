@@ -6,9 +6,9 @@
   "extension.createRelationFromRange.title": "从这个选区创建联系",
   "extension.createRelationToRange.title": "创建联系到这个选区",
   "extension.deleteRelation.title": "删除联系",
-  "extension.refresh.title": "刷新",
+  "extension.refresh.title": "刷新联系",
   "extension.relationView.title": "联系",
   "extension.RelationExplorerView.name": "联系",
   "extension.HelpAndFeedback.name": "帮助和反馈",
-  "extension.search.title": "搜索"
+  "extension.search.title": "搜索联系"
 }
