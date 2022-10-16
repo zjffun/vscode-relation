@@ -5,6 +5,7 @@
   "extension.createRelationTo.title": "创建联系到这个文件",
   "extension.createRelationFromRange.title": "从这个选区创建联系",
   "extension.createRelationToRange.title": "创建联系到这个选区",
+  "extension.searchRelationByFile.title": "查找文件的联系",
   "extension.deleteRelation.title": "删除联系",
   "extension.refresh.title": "刷新联系",
   "extension.relationView.title": "联系",

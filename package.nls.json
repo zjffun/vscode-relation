@@ -5,6 +5,7 @@
   "extension.createRelationTo.title": "Create Relation To This File",
   "extension.createRelationFromRange.title": "Create Relation From This Range",
   "extension.createRelationToRange.title": "Create Relation To This Range",
+  "extension.searchRelationByFile.title": "Search Relation By File",
   "extension.deleteRelation.title": "Delete Relation",
   "extension.refresh.title": "Refresh Relation",
   "extension.relationView.title": "Relation",

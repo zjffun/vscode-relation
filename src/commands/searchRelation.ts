@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as path from "path";
 import { IRelation, IRelationContainer } from "..";
 import { RelationService } from "../RelationService";
 import { showRelationCommandId } from "./showRelation";
@@ -16,7 +17,10 @@ export default async () => {
 
   for (const relation of relations) {
     quickPickItems.push({
-      label: `${relation.fromPath} -> ${relation.toPath}`,
+      label: `${path.join(
+        relation.fromBaseDir,
+        relation.fromPath
+      )} -> ${path.join(relation.toBaseDir, relation.toPath)}`,
       description: "",
       detail: "",
       relation: relation,

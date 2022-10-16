@@ -1,9 +1,11 @@
 import classnames from "classnames";
-import { MouseEventHandler, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { IViewData } from "relation2-core";
 import { CreateMode, RelationEditor } from "relation2-react";
+import UpdateRelationDialog, {
+  getUpdateRelationData,
+} from "./UpdateRelationDialog";
 
 import "./index.scss";
 
@@ -43,73 +45,23 @@ if (!searchParams) {
   });
 }
 
-const options = (data: any) => {
-  const payload = {
-    id: data.id,
-    fromModifiedRange: data.fromModifiedRange,
-    toModifiedRange: data.toModifiedRange,
-  };
-
+const options = (showDialog: (id: string) => void) => (data: any) => {
   const OptionsComponent = () => {
-    const dialogElRef = useRef<HTMLDialogElement>(null);
-
-    const showDialog: MouseEventHandler<HTMLButtonElement> = (e) => {
-      const { bottom, right } = (
-        e.target as HTMLButtonElement
-      ).getBoundingClientRect();
-
-      if (dialogElRef.current?.style) {
-        dialogElRef.current.style.top = `${bottom}px`;
-        dialogElRef.current.style.right = `${window.innerWidth - right}px`;
-      }
-
-      dialogElRef.current?.showModal();
-    };
-
     return (
       <>
-        <button onClick={showDialog}>more</button>
-        {createPortal(
-          <dialog className="optionsDialog" ref={dialogElRef}>
-            <button
-              onClick={() => {
-                window.vsCodeApi.postMessage({
-                  type: "relationUpdateFromClick",
-                  payload,
-                });
-
-                dialogElRef.current?.close();
-              }}
-            >
-              update from
-            </button>
-            <button
-              onClick={() => {
-                window.vsCodeApi.postMessage({
-                  type: "relationUpdateToClick",
-                  payload,
-                });
-
-                dialogElRef.current?.close();
-              }}
-            >
-              update to
-            </button>
-            <button
-              onClick={() => {
-                window.vsCodeApi.postMessage({
-                  type: "relationUpdateBothClick",
-                  payload,
-                });
-
-                dialogElRef.current?.close();
-              }}
-            >
-              update both
-            </button>
-          </dialog>,
-          document.body
-        )}
+        <button
+          onClick={() => {
+            window.vsCodeApi.postMessage({
+              type: "relationDeleteButtonClick",
+              payload: {
+                id: data.id,
+              },
+            });
+          }}
+        >
+          Delete
+        </button>
+        <button onClick={() => showDialog(data.id)}>Update</button>
       </>
     );
   };
@@ -119,6 +71,11 @@ const options = (data: any) => {
 
 const Page = () => {
   const [showOptions, setShowOptions] = useState(false);
+  const [updateRelationDialogVisible, setUpdateRelationDialogVisible] =
+    useState(false);
+  const [updateRelationData, setUpdateRelationData] = useState<any>(null);
+  const [currentUpdateCheckResultId, setCurrentUpdateCheckResultId] =
+    useState("");
 
   const [viewCheckResults, setviewCheckResults] = useState(
     (window as any).__VIEW_CHECK_RESULTS__ as IViewData
@@ -134,20 +91,26 @@ const Page = () => {
     diffEditorRef?: any;
   }>({});
 
+  const showDialog = (id: string) => {
+    setCurrentUpdateCheckResultId(id);
+    const checkResult = viewCheckResults.checkResults.find((d) => d.id === id);
+
+    if (!checkResult) {
+      setUpdateRelationData(null);
+      return;
+    }
+
+    setUpdateRelationDialogVisible(true);
+    setUpdateRelationData(
+      getUpdateRelationData(checkResult, viewCheckResults.fileContents)
+    );
+  };
+
   return (
     <main className={"relation-overview"}>
       <header className="relation-overview__header">
         <ul className="relation-overview__header__list">
-          <li>
-            <button
-              onClick={() => {
-                window.vsCodeApi.postMessage({
-                  type: "relationResetRelationsClick",
-                });
-              }}
-            >
-              Reset Relations
-            </button>
+          <li className="relation-overview__header__list__item">
             <button
               onClick={() => {
                 window.vsCodeApi.postMessage({
@@ -160,14 +123,8 @@ const Page = () => {
             >
               Update Relations
             </button>
-            <label>
-              <input
-                type="checkbox"
-                checked={showOptions}
-                onChange={(e) => setShowOptions(e.target.checked)}
-              />
-              Show Options
-            </label>
+          </li>
+          <li className="relation-overview__header__list__item">
             <button
               onClick={() => {
                 window.vsCodeApi.postMessage({
@@ -177,6 +134,8 @@ const Page = () => {
             >
               Open From File
             </button>
+          </li>
+          <li className="relation-overview__header__list__item">
             <button
               onClick={() => {
                 window.vsCodeApi.postMessage({
@@ -186,6 +145,29 @@ const Page = () => {
             >
               Open To File
             </button>
+          </li>
+          <li className="relation-overview__header__list__item">
+            <button
+              onClick={() => {
+                window.vsCodeApi.postMessage({
+                  type: "relationResetRelationsClick",
+                });
+              }}
+            >
+              Reset Relations
+            </button>
+          </li>
+          <li className="relation-overview__header__list__item">
+            <label>
+              <input
+                type="checkbox"
+                checked={showOptions}
+                onChange={(e) => setShowOptions(e.target.checked)}
+              />
+              Show Options
+            </label>
+          </li>
+          <li className="relation-overview__header__list__item">
             <CreateMode
               onCreate={(data) => {
                 window.vsCodeApi.postMessage({
@@ -206,7 +188,7 @@ const Page = () => {
         <RelationEditor
           checkResults={viewCheckResults.checkResults}
           fileContents={viewCheckResults.fileContents}
-          options={options}
+          options={options(showDialog)}
           ref={diffEditorRef}
           onFromSave={(editor) => {
             const content = editor?.getValue();
@@ -230,6 +212,20 @@ const Page = () => {
           }}
         />
       </section>
+      <UpdateRelationDialog
+        visible={updateRelationDialogVisible}
+        onSave={(data) => {
+          window.vsCodeApi.postMessage({
+            type: "relationUpdate",
+            payload: {
+              id: currentUpdateCheckResultId,
+              ...data,
+            },
+          });
+        }}
+        onClose={() => setUpdateRelationDialogVisible(false)}
+        updateRelationData={updateRelationData}
+      />
     </main>
   );
 };

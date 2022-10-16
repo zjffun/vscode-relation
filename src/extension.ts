@@ -28,6 +28,9 @@ import createRelationToRange, {
   createRelationToRangeCommandId,
 } from "./commands/createRelationToRange";
 import search, { searchCommandId } from "./commands/searchRelation";
+import searchRelationByFile, {
+  searchRelationByFileCommandId,
+} from "./commands/searchRelationByFile";
 
 export const log = vscode.window.createOutputChannel("Relation");
 
@@ -51,6 +54,12 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(createRelationToCommandId, (uri) => {
       createRelationTo(uri);
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(searchRelationByFileCommandId, (uri) => {
+      searchRelationByFile(uri);
     })
   );
 

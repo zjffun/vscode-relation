@@ -178,10 +178,12 @@ export class RelationWebview {
               })
             );
 
+            await this.loadPage();
+
             return;
           }
 
-          case "relationUpdateFromClick": {
+          case "relationUpdate": {
             const checkResult = checkResults.find((d) => d.id === payload.id);
 
             if (!checkResult) {
@@ -190,98 +192,24 @@ export class RelationWebview {
 
             const fromRev = await GitServer.parseRev(
               cwd,
-              "HEAD",
-              checkResult.fromBaseDir
-            );
-
-            const answer = await vscode.window.showWarningMessage(
-              `Do you want to update ${payload.id} fromRev to HEAD(${fromRev})?`,
-              {
-                modal: true,
-              },
-              "Yes"
-            );
-
-            if (answer !== "Yes") {
-              return;
-            }
-
-            relationServer.updateById(payload.id, {
-              fromRev,
-              fromRange: payload.fromModifiedRange,
-            });
-
-            return;
-          }
-          case "relationUpdateToClick": {
-            const checkResult = checkResults.find((d) => d.id === payload.id);
-
-            if (!checkResult) {
-              return;
-            }
-
-            const toRev = await GitServer.parseRev(
-              cwd,
-              "HEAD",
-              checkResult.toBaseDir
-            );
-
-            const answer = await vscode.window.showWarningMessage(
-              `Do you want to update ${payload.id} toRev to HEAD(${toRev})?`,
-              {
-                modal: true,
-              },
-              "Yes"
-            );
-
-            if (answer !== "Yes") {
-              return;
-            }
-
-            relationServer.updateById(payload.id, {
-              toRev,
-              toRange: payload.toModifiedRange,
-            });
-
-            return;
-          }
-          case "relationUpdateBothClick": {
-            const checkResult = checkResults.find((d) => d.id === payload.id);
-
-            if (!checkResult) {
-              return;
-            }
-
-            const fromRev = await GitServer.parseRev(
-              cwd,
-              "HEAD",
+              payload.fromRev,
               checkResult.fromBaseDir
             );
 
             const toRev = await GitServer.parseRev(
               cwd,
-              "HEAD",
+              payload.toRev,
               checkResult.toBaseDir
             );
-
-            const answer = await vscode.window.showWarningMessage(
-              `Do you want to update ${payload.id} fromRev to HEAD(${fromRev} and toRev to HEAD(${toRev})?`,
-              {
-                modal: true,
-              },
-              "Yes"
-            );
-
-            if (answer !== "Yes") {
-              return;
-            }
 
             relationServer.updateById(payload.id, {
               fromRev,
               toRev,
-              fromRange: payload.fromModifiedRange,
-              toRange: payload.toModifiedRange,
+              fromRange: payload.fromRange,
+              toRange: payload.toRange,
             });
+
+            await this.loadPage();
 
             return;
           }
@@ -305,7 +233,7 @@ export class RelationWebview {
             );
 
             const answer = await vscode.window.showWarningMessage(
-              `Do you want to update relations fromRev to HEAD(${fromRev} and toRev to HEAD(${toRev})?`,
+              `Do you want to update relations fromRev to HEAD(${fromRev}) and toRev to HEAD(${toRev})?`,
               {
                 modal: true,
               },

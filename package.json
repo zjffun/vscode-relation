@@ -77,6 +77,10 @@
         {
           "command": "_vscode-relation._createRelationTo",
           "when": "!explorerResourceIsFolder"
+        },
+        {
+          "command": "_vscode-relation._searchRelationByFile",
+          "when": "!explorerResourceIsFolder"
         }
       ],
       "editor/context": [
@@ -106,6 +110,10 @@
         },
         {
           "command": "_vscode-relation._createRelationTo",
+          "when": "false"
+        },
+        {
+          "command": "_vscode-relation._searchRelationByFile",
           "when": "false"
         },
         {
@@ -139,6 +147,10 @@
       {
         "command": "_vscode-relation._createRelationTo",
         "title": "%extension.createRelationTo.title%"
+      },
+      {
+        "command": "_vscode-relation._searchRelationByFile",
+        "title": "%extension.searchRelationByFile.title%"
       },
       {
         "command": "_vscode-relation._createRelationFromRange",
