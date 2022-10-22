@@ -1,9 +1,9 @@
-import { RelationFormWebview } from "../views/RelationFormWebview";
+import { CreateRelationsWebview } from "../views/CreateRelationsWebview";
 
 export const createRelationCommandId = "_vscode-relation._createRelation";
 
 export default async () => {
-  const relationFormWebview = RelationFormWebview.singleton();
-  relationFormWebview.reveal();
+  const createRelationsWebview = CreateRelationsWebview.singleton();
+  createRelationsWebview.reveal();
   return true;
 };

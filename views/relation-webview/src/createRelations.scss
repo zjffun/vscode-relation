@@ -1,0 +1,19 @@
+.create-relations-page {
+  height: 100vh;
+}
+
+.create-relations {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  &__header {
+    height: auto;
+    flex: 0 0 auto;
+    &__list {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+  }
+}

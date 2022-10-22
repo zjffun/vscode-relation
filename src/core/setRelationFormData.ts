@@ -1,4 +1,4 @@
-import { RelationFormWebview } from "../views/RelationFormWebview";
+import { CreateRelationsWebview } from "../views/CreateRelationsWebview";
 
 export default async ({
   type,
@@ -11,16 +11,16 @@ export default async ({
   startLine?: number;
   endLine?: number;
 }) => {
-  const relationFormWebview = RelationFormWebview.singleton();
+  const createRelationsWebview = CreateRelationsWebview.singleton();
 
-  relationFormWebview.reveal();
+  createRelationsWebview.reveal();
   let formConfig = "file";
 
   if (startLine) {
     formConfig = "fileLine";
   }
 
-  relationFormWebview.postMessage({
+  createRelationsWebview.postMessage({
     type: "setFormData",
     payload: {
       operationType: "create",

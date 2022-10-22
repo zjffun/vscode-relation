@@ -1,18 +1,14 @@
 import * as vscode from "vscode";
-import setRelationFormData from "../core/setRelationFormData";
+import { CreateRelationsWebview } from "../views/CreateRelationsWebview";
 
 export const createRelationFromCommandId =
   "_vscode-relation._createRelationFrom";
 
 export default async (uri: vscode.Uri) => {
-  const path = uri.path;
+  const createRelationsWebview = CreateRelationsWebview.singleton();
 
-  if (!path) {
-    throw new Error("Failed to create relation from uri: can't find path");
-  }
+  createRelationsWebview.fromUri = uri;
 
-  setRelationFormData({
-    type: "from",
-    path,
-  });
+  createRelationsWebview.reveal();
+  createRelationsWebview.setFromContent("HEAD");
 };

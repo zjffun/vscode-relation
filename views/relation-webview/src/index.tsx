@@ -186,6 +186,10 @@ const Page = () => {
         })}
       >
         <RelationEditor
+          fromPath={viewCheckResults.fromPath}
+          fromBaseDir={viewCheckResults.fromBaseDir}
+          toPath={viewCheckResults.toPath}
+          toBaseDir={viewCheckResults.toBaseDir}
           checkResults={viewCheckResults.checkResults}
           fileContents={viewCheckResults.fileContents}
           options={options(showDialog)}

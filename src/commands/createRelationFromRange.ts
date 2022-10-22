@@ -4,6 +4,7 @@ import setRelationFormData from "../core/setRelationFormData";
 export const createRelationFromRangeCommandId =
   "_vscode-relation._createRelationFromRange";
 
+// TODO: update
 export default async () => {
   const { activeTextEditor } = vscode.window;
 

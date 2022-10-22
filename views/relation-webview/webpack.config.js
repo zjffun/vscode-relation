@@ -22,9 +22,13 @@ const banner = () => {
 const isProduction = process.env.NODE_ENV === "production";
 
 const config = {
-  entry: path.resolve(__dirname, "./src/index.tsx"),
+  entry: {
+    main: path.resolve(__dirname, "./src/index.tsx"),
+    createRelations: path.resolve(__dirname, "./src/createRelations.tsx"),
+  },
   output: {
     path: path.resolve(__dirname, "../../out-view"),
+    filename: "[name].js",
     clean: true,
   },
   plugins: [
