@@ -14,7 +14,8 @@ export interface IRelationWorkspace extends IRelationBase {
   children: IRelationContainer[];
 }
 
-export interface IRelationContainer extends IRawRelationCommon, IRelationBase {
+export interface IRelationContainer
+  extends Omit<Omit<Omit<IRelation, "id">, "fromRange">,"toRange"> {
   uri?: vscode.Uri;
   isWorkspace?: boolean;
   children: IRelationContainer[] | IRelation[];

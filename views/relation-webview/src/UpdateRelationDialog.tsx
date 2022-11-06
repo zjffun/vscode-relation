@@ -1,40 +1,37 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ICheckResultView, IFileContents } from "relation2-core";
+import { IContents } from "relation2-core";
 import {
   UpdateRelation,
   UpdateRelationOption,
-  PartTypeEnum,
-  getFileContentKey,
   UpdateRelationRef,
+  IRelationWithOriginalContentInfo,
 } from "relation2-react";
 
 import "./UpdateRelationDialog.scss";
 
 export const getUpdateRelationData = (
-  checkResult: ICheckResultView,
-  fileContents: IFileContents
+  relationWithOriginalContentInfo: IRelationWithOriginalContentInfo,
+  contents: IContents
 ) => {
-  const fromRev = checkResult.fromRev;
-  const fromRange = checkResult.fromRange;
-  const toRev = checkResult.toRev;
-  const toRange = checkResult.toRange;
+  const fromRev = relationWithOriginalContentInfo.fromGitRev;
+  const fromRange = relationWithOriginalContentInfo.fromRange;
+  const toRev = relationWithOriginalContentInfo.toGitRev;
+  const toRange = relationWithOriginalContentInfo.toRange;
 
   const fromOptions = [
     {
       label: fromRev,
       rev: fromRev,
-      content: fileContents[getFileContentKey(checkResult, PartTypeEnum.FROM)],
+      content: contents[relationWithOriginalContentInfo.fromOriginalContentRev],
       range: fromRange,
     },
     {
       label: "HEAD",
       rev: "HEAD",
       content:
-        fileContents[
-          getFileContentKey({ ...checkResult, fromRev: "" }, PartTypeEnum.FROM)
-        ],
-      range: checkResult.fromModifiedRange,
+        contents[relationWithOriginalContentInfo._modifiedFromContentRev],
+      range: relationWithOriginalContentInfo.fromModifiedRange,
     },
   ];
 
@@ -42,17 +39,14 @@ export const getUpdateRelationData = (
     {
       label: toRev,
       rev: toRev,
-      content: fileContents[getFileContentKey(checkResult, PartTypeEnum.TO)],
+      content: contents[relationWithOriginalContentInfo.toOriginalContentRev],
       range: toRange,
     },
     {
       label: "HEAD",
       rev: "HEAD",
-      content:
-        fileContents[
-          getFileContentKey({ ...checkResult, toRev: "" }, PartTypeEnum.TO)
-        ],
-      range: checkResult.toModifiedRange,
+      content: contents[relationWithOriginalContentInfo._modifiedToContentRev],
+      range: relationWithOriginalContentInfo.toModifiedRange,
     },
   ];
 

@@ -26,15 +26,12 @@ export default async (uri: vscode.Uri) => {
   const quickPickItems: ISnippetQuickPickItem[] = [];
 
   for (const relation of relations) {
-    const fromTempPath = path.join(relation.fromBaseDir, relation.fromPath);
-    const toTempPath = path.join(relation.toBaseDir, relation.toPath);
-
     if (
-      filePath === path.join(workspaceFolderPath, fromTempPath) ||
-      filePath === path.join(workspaceFolderPath, toTempPath)
+      filePath === path.join(workspaceFolderPath, relation.fromPath) ||
+      filePath === path.join(workspaceFolderPath, relation.toPath)
     ) {
       quickPickItems.push({
-        label: `${fromTempPath} -> ${toTempPath}`,
+        label: `${relation.fromPath} -> ${relation.toPath}`,
         description: "",
         detail: "",
         relation: relation,

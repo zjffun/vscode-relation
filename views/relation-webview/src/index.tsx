@@ -1,8 +1,12 @@
 import classnames from "classnames";
 import { useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { IViewData } from "relation2-core";
-import { CreateMode, RelationEditor } from "relation2-react";
+import { IRelationsWithContents } from "relation2-core";
+import {
+  CreateMode,
+  RelationEditor,
+  IRelationEditorRef,
+} from "relation2-react";
 import UpdateRelationDialog, {
   getUpdateRelationData,
 } from "./UpdateRelationDialog";
@@ -10,11 +14,12 @@ import UpdateRelationDialog, {
 import "./index.scss";
 
 const checkResultsJSONString =
-  document.getElementById("viewCheckResultsText")!.textContent || "";
+  document.getElementById("viewDataText")!.textContent || "";
 
-(window as any).__VIEW_CHECK_RESULTS__ = JSON.parse(checkResultsJSONString);
+(window as any).__VIEW_DATA__ = JSON.parse(checkResultsJSONString);
 
 document.addEventListener("submitCreateRelation", (event: any) => {
+  // TODO: check whether saved
   window.vsCodeApi.postMessage({
     type: "submitCreateRelation",
     payload: event.detail,
@@ -77,32 +82,35 @@ const Page = () => {
   const [currentUpdateCheckResultId, setCurrentUpdateCheckResultId] =
     useState("");
 
-  const [viewCheckResults, setviewCheckResults] = useState(
-    (window as any).__VIEW_CHECK_RESULTS__ as IViewData
+  const [viewData, setViewData] = useState(
+    (window as any).__VIEW_DATA__ as IRelationsWithContents
   );
 
   const [showingRelation, setShowingRelation] = useState(searchParams.id);
 
-  if (!viewCheckResults?.fileContents) {
+  if (!viewData?.contents) {
     return null;
   }
 
-  const diffEditorRef = useRef<{
-    diffEditorRef?: any;
-  }>({});
+  const diffEditorRef = useRef<IRelationEditorRef>({
+    relationsWithOriginalContent: [],
+  });
 
   const showDialog = (id: string) => {
     setCurrentUpdateCheckResultId(id);
-    const checkResult = viewCheckResults.checkResults.find((d) => d.id === id);
+    const relationWithContentInfo =
+      diffEditorRef.current.relationsWithOriginalContent.find(
+        (d) => d.id === id
+      );
 
-    if (!checkResult) {
+    if (!relationWithContentInfo) {
       setUpdateRelationData(null);
       return;
     }
 
     setUpdateRelationDialogVisible(true);
     setUpdateRelationData(
-      getUpdateRelationData(checkResult, viewCheckResults.fileContents)
+      getUpdateRelationData(relationWithContentInfo, viewData.contents)
     );
   };
 
@@ -110,20 +118,6 @@ const Page = () => {
     <main className={"relation-overview"}>
       <header className="relation-overview__header">
         <ul className="relation-overview__header__list">
-          <li className="relation-overview__header__list__item">
-            <button
-              onClick={() => {
-                window.vsCodeApi.postMessage({
-                  type: "relationUpdateRelationsClick",
-                  payload: {
-                    checkResults: viewCheckResults.checkResults,
-                  },
-                });
-              }}
-            >
-              Update Relations
-            </button>
-          </li>
           <li className="relation-overview__header__list__item">
             <button
               onClick={() => {
@@ -144,17 +138,6 @@ const Page = () => {
               }}
             >
               Open To File
-            </button>
-          </li>
-          <li className="relation-overview__header__list__item">
-            <button
-              onClick={() => {
-                window.vsCodeApi.postMessage({
-                  type: "relationResetRelationsClick",
-                });
-              }}
-            >
-              Reset Relations
             </button>
           </li>
           <li className="relation-overview__header__list__item">
@@ -186,19 +169,15 @@ const Page = () => {
         })}
       >
         <RelationEditor
-          fromPath={viewCheckResults.fromPath}
-          fromBaseDir={viewCheckResults.fromBaseDir}
-          toPath={viewCheckResults.toPath}
-          toBaseDir={viewCheckResults.toBaseDir}
-          checkResults={viewCheckResults.checkResults}
-          fileContents={viewCheckResults.fileContents}
+          contents={viewData.contents}
+          relationsWithContentInfo={viewData.relationsWithContentInfo}
           options={options(showDialog)}
           ref={diffEditorRef}
           onFromSave={(editor) => {
             const content = editor?.getValue();
 
             window.vsCodeApi.postMessage({
-              type: "relationFromSave",
+              type: "relationFromFileSave",
               payload: {
                 content,
               },
@@ -208,7 +187,7 @@ const Page = () => {
             const content = editor?.getValue();
 
             window.vsCodeApi.postMessage({
-              type: "relationToSave",
+              type: "relationToFileSave",
               payload: {
                 content,
               },
@@ -220,7 +199,7 @@ const Page = () => {
         visible={updateRelationDialogVisible}
         onSave={(data) => {
           window.vsCodeApi.postMessage({
-            type: "relationUpdate",
+            type: "submitUpdateRelation",
             payload: {
               id: currentUpdateCheckResultId,
               ...data,

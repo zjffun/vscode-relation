@@ -1,17 +1,18 @@
 import * as vscode from "vscode";
 
 import { RelationServer } from "relation2-core";
+import { rangeToString } from "../util";
 
 export default async ({
   fromPath,
   toPath,
-  fromRev,
-  toRev,
+  fromRange,
+  toRange,
 }: {
   fromPath: string;
   toPath: string;
-  fromRev?: string;
-  toRev?: string;
+  fromRange: [number, number];
+  toRange: [number, number];
 }) => {
   const uri = vscode.Uri.parse(toPath);
 
@@ -25,7 +26,9 @@ export default async ({
   const cwd = workspaceUri.path;
 
   const result = await vscode.window.showInformationMessage(
-    `Create relation ${fromPath} -> ${toPath}`,
+    `Create relation ${fromPath}:${rangeToString(
+      fromRange
+    )} -> ${toPath}:${rangeToString(toRange)}`,
     {
       modal: true,
     },
@@ -33,17 +36,20 @@ export default async ({
     "No"
   );
 
+  // TODO: content or git mode
   if (result === "Yes") {
     const relationServer = new RelationServer(cwd);
 
     relationServer.write([
       ...relationServer.read(),
-      ...(await relationServer.createMarkdownRelations({
+      await relationServer.create({
         fromPath: fromPath,
         toPath: toPath,
-        fromRev: !fromRev ? "HEAD" : fromRev,
-        toRev: !toRev ? "HEAD" : toRev,
-      })),
+        fromRange,
+        toRange,
+        // fromGitRev: !fromRev ? "HEAD" : fromRev,
+        // toGitRev: !toRev ? "HEAD" : toRev,
+      }),
     ]);
 
     return true;
