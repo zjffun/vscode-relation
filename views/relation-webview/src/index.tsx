@@ -1,7 +1,7 @@
 import classnames from "classnames";
 import { useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { IRelationsWithContents } from "relation2-core";
+import { IRelationViewerData } from "relation2-core";
 import {
   CreateMode,
   RelationEditor,
@@ -13,10 +13,13 @@ import UpdateRelationDialog, {
 
 import "./index.scss";
 
-const checkResultsJSONString =
-  document.getElementById("viewDataText")!.textContent || "";
+const escapedRelationViewerDataJSONString =
+  document.getElementById("escapedRelationViewerDataJSONString")!.textContent ||
+  "";
 
-(window as any).__VIEW_DATA__ = JSON.parse(checkResultsJSONString);
+(window as any).__RELATION_VIEWER_DATA__ = JSON.parse(
+  escapedRelationViewerDataJSONString
+);
 
 document.addEventListener("submitCreateRelation", (event: any) => {
   // TODO: check whether saved
@@ -82,13 +85,13 @@ const Page = () => {
   const [currentUpdateCheckResultId, setCurrentUpdateCheckResultId] =
     useState("");
 
-  const [viewData, setViewData] = useState(
-    (window as any).__VIEW_DATA__ as IRelationsWithContents
+  const [relationViewerData, setRelationViewerData] = useState(
+    (window as any).__RELATION_VIEWER_DATA__ as IRelationViewerData
   );
 
   const [showingRelation, setShowingRelation] = useState(searchParams.id);
 
-  if (!viewData?.contents) {
+  if (!relationViewerData) {
     return null;
   }
 
@@ -98,19 +101,22 @@ const Page = () => {
 
   const showDialog = (id: string) => {
     setCurrentUpdateCheckResultId(id);
-    const relationWithContentInfo =
+    const relationWithOriginalContentInfo =
       diffEditorRef.current.relationsWithOriginalContent.find(
         (d) => d.id === id
       );
 
-    if (!relationWithContentInfo) {
+    if (!relationWithOriginalContentInfo) {
       setUpdateRelationData(null);
       return;
     }
 
     setUpdateRelationDialogVisible(true);
     setUpdateRelationData(
-      getUpdateRelationData(relationWithContentInfo, viewData.contents)
+      getUpdateRelationData({
+        relationWithOriginalContentInfo,
+        ...relationViewerData,
+      })
     );
   };
 
@@ -169,8 +175,7 @@ const Page = () => {
         })}
       >
         <RelationEditor
-          contents={viewData.contents}
-          relationsWithContentInfo={viewData.relationsWithContentInfo}
+          relationViewerData={relationViewerData}
           options={options(showDialog)}
           ref={diffEditorRef}
           onFromSave={(editor) => {

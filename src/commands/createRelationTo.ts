@@ -9,5 +9,5 @@ export default async (uri: vscode.Uri) => {
   createRelationsWebview.toUri = uri;
 
   createRelationsWebview.reveal();
-  createRelationsWebview.setToContent("HEAD");
+  createRelationsWebview.setToContent("");
 };

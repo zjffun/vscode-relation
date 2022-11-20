@@ -1,13 +1,7 @@
-import * as path from "path";
 import * as vscode from "vscode";
 import * as nls from "vscode-nls";
 
-import {
-  getKey,
-  GitServer,
-  IRawRelation,
-  RelationServer,
-} from "relation2-core";
+import { IRawRelation, Relation, RelationServer } from "relation2-core";
 import stringifyJsonScriptContent from "stringify-json-script-content";
 import { IRelation, IRelationContainer } from "..";
 import createRelation from "../core/createRelation";
@@ -109,19 +103,19 @@ export class RelationWebview {
       this.relation?.workspaceFolderUri?.path
     );
 
-    const relationsKey = getKey(this.relation as IRelation);
+    const relationInstance = new Relation({
+      workingDirectory: this.relation?.workspaceFolderUri?.path,
+      fromPath: this.relation?.fromPath,
+      toPath: this.relation?.toPath,
+    });
 
-    const { relationsWithContentInfo, contents } =
-      await relationServer.getRelationsWithContentsByKey(relationsKey);
+    const relationViewerData = await relationServer.getRelationViewerData({
+      fromPath: this.relation.fromPath,
+      toPath: this.relation.toPath,
+    });
 
-    const viewData = {
-      key: relationsKey,
-      relationsWithContentInfo,
-      contents,
-    };
-
-    const escapedViewDataJSONString = stringifyJsonScriptContent(
-      viewData,
+    const escapedRelationViewerDataJSONString = stringifyJsonScriptContent(
+      relationViewerData,
       null,
       2
     );
@@ -132,51 +126,38 @@ export class RelationWebview {
         switch (type) {
           case "submitCreateRelation":
             if (this.relation.fromPath && this.relation.toPath) {
+              const relation = new Relation({
+                workingDirectory: cwd,
+                fromPath: this.relation.fromPath,
+                toPath: this.relation.toPath,
+              });
+
               createRelation({
-                fromPath: relationServer.getFileAbsolutePath(
-                  this.relation.fromPath
-                ),
-                toPath: relationServer.getFileAbsolutePath(
-                  this.relation.toPath
-                ),
+                fromAbsolutePath: relation.fromAbsolutePath,
+                toAbsolutePath: relation.toAbsolutePath,
                 fromRange: [+payload.fromStartLine, +payload.fromEndLine],
                 toRange: [+payload.toStartLine, +payload.toEndLine],
               });
             }
             return;
 
-          // TODO: content mode
           case "submitUpdateRelation": {
-            const checkResult = relationsWithContentInfo.find(
-              (d) => d.id === payload.id
-            );
+            await relationServer.updateById(payload.id, async (relation) => {
+              relation.fromRange = payload.fromRange;
+              relation.toRange = payload.toRange;
 
-            if (!checkResult) {
-              return;
-            }
+              if (payload.fromOptionValue === "fromModified") {
+                await relation.autoSetFromRev();
+              }
 
-            const fromGitRev = await GitServer.parseRev(
-              cwd,
-              payload.fromRev,
-              checkResult.fromGitWorkingDirectory
-            );
+              if (payload.toOptionValue === "toModified") {
+                await relation.autoSetToRev();
+              }
 
-            const toGitRev = await GitServer.parseRev(
-              cwd,
-              payload.toRev,
-              checkResult.fromGitWorkingDirectory
-            );
-
-            relationServer.updateById(payload.id, {
-              fromGitRev,
-              toGitRev,
-              fromRange: payload.fromRange,
-              toRange: payload.toRange,
+              return relation;
             });
 
             await this.loadPage();
-
-            return;
           }
 
           case "relationDetailButtonClick":
@@ -201,8 +182,8 @@ export class RelationWebview {
             }
 
             relationServer.write(
-              relationServer.filter((currentRelation: IRawRelation) => {
-                return currentRelation.id !== payload.id;
+              relationServer.filter((relation: IRawRelation) => {
+                return relation.id !== payload.id;
               })
             );
 
@@ -216,9 +197,7 @@ export class RelationWebview {
 
             if (relation.fromPath) {
               await vscode.workspace.fs.writeFile(
-                vscode.Uri.file(
-                  relationServer.getFileAbsolutePath(relation.fromPath)
-                ),
+                vscode.Uri.file(relationInstance.fromAbsolutePath),
                 Uint8Array.from(Buffer.from(payload.content))
               );
             }
@@ -233,9 +212,7 @@ export class RelationWebview {
 
             if (relation.toPath) {
               await vscode.workspace.fs.writeFile(
-                vscode.Uri.file(
-                  relationServer.getFileAbsolutePath(relation.toPath)
-                ),
+                vscode.Uri.file(relationInstance.toAbsolutePath),
                 Uint8Array.from(Buffer.from(payload.content))
               );
             }
@@ -251,9 +228,7 @@ export class RelationWebview {
             if (relation.fromPath) {
               vscode.commands.executeCommand(
                 "vscode.open",
-                vscode.Uri.file(
-                  relationServer.getFileAbsolutePath(relation.fromPath)
-                )
+                vscode.Uri.file(relationInstance.fromAbsolutePath)
               );
             }
 
@@ -266,9 +241,7 @@ export class RelationWebview {
             if (relation.toPath) {
               vscode.commands.executeCommand(
                 "vscode.open",
-                vscode.Uri.file(
-                  relationServer.getFileAbsolutePath(relation.toPath)
-                )
+                vscode.Uri.file(relationInstance.toAbsolutePath)
               );
             }
 
@@ -310,8 +283,8 @@ export class RelationWebview {
 				<div id="root">
           <vscode-progress-ring></vscode-progress-ring>
         </div>
-        <script id="viewDataText" type="application/json">
-          ${escapedViewDataJSONString}
+        <script id="escapedRelationViewerDataJSONString" type="application/json">
+          ${escapedRelationViewerDataJSONString}
         </script>
         <script nonce="${nonce}">
           window.i18nText = ${JSON.stringify(i18nText)};
@@ -319,7 +292,6 @@ export class RelationWebview {
         <script nonce="${nonce}">
           window.relationSearchParams = ${JSON.stringify({
             id: (this.relation as IRelation).id,
-            relationsKey,
             detailMode: (this.relation as { detailMode: boolean }).detailMode,
           })}
         </script>

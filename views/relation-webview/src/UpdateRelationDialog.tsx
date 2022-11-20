@@ -1,60 +1,72 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { IContents } from "relation2-core";
+import { IViewerContents } from "relation2-core";
 import {
+  IRelationWithOriginalContentInfo,
   UpdateRelation,
   UpdateRelationOption,
   UpdateRelationRef,
-  IRelationWithOriginalContentInfo,
 } from "relation2-react";
 
 import "./UpdateRelationDialog.scss";
 
-export const getUpdateRelationData = (
-  relationWithOriginalContentInfo: IRelationWithOriginalContentInfo,
-  contents: IContents
-) => {
-  const fromRev = relationWithOriginalContentInfo.fromGitRev;
-  const fromRange = relationWithOriginalContentInfo.fromRange;
-  const toRev = relationWithOriginalContentInfo.toGitRev;
-  const toRange = relationWithOriginalContentInfo.toRange;
+export const getUpdateRelationData = ({
+  relationWithOriginalContentInfo,
+  viewerContents,
+  fromModifiedContent,
+  toModifiedContent,
+}: {
+  relationWithOriginalContentInfo: IRelationWithOriginalContentInfo;
+  viewerContents: IViewerContents;
+  fromModifiedContent: string;
+  toModifiedContent: string;
+}) => {
+  const fromOptionValue = "fromModified";
+  const fromModifiedRange = relationWithOriginalContentInfo.fromModifiedRange;
+  const toOptionValue = "toModified";
+  const toModifiedRange = relationWithOriginalContentInfo.toModifiedRange;
 
   const fromOptions = [
     {
-      label: fromRev,
-      rev: fromRev,
-      content: contents[relationWithOriginalContentInfo.fromOriginalContentRev],
-      range: fromRange,
+      label: "Original",
+      value: "fromOriginal",
+      content:
+        viewerContents[
+          relationWithOriginalContentInfo.originalFromViewerContentRev
+        ],
+      range: relationWithOriginalContentInfo.fromRange,
     },
     {
-      label: "HEAD",
-      rev: "HEAD",
-      content:
-        contents[relationWithOriginalContentInfo._modifiedFromContentRev],
-      range: relationWithOriginalContentInfo.fromModifiedRange,
+      label: "Modified",
+      value: "fromModified",
+      content: fromModifiedContent,
+      range: fromModifiedRange,
     },
   ];
 
   const toOptions = [
     {
-      label: toRev,
-      rev: toRev,
-      content: contents[relationWithOriginalContentInfo.toOriginalContentRev],
-      range: toRange,
+      label: "Original",
+      value: "toOriginal",
+      content:
+        viewerContents[
+          relationWithOriginalContentInfo.originalToViewerContentRev
+        ],
+      range: relationWithOriginalContentInfo.toRange,
     },
     {
-      label: "HEAD",
-      rev: "HEAD",
-      content: contents[relationWithOriginalContentInfo._modifiedToContentRev],
-      range: relationWithOriginalContentInfo.toModifiedRange,
+      label: "Modified",
+      value: "toModified",
+      content: toModifiedContent,
+      range: toModifiedRange,
     },
   ];
 
   return {
-    fromRev,
-    fromRange,
-    toRev,
-    toRange,
+    fromOptionValue,
+    fromRange: fromModifiedRange,
+    toOptionValue,
+    toRange: toModifiedRange,
     fromOptions,
     toOptions,
   };
@@ -68,16 +80,16 @@ const UpdateRelationDialog = ({
 }: {
   visible: boolean;
   onSave: (data: {
-    fromRev: string;
+    fromOptionValue: string;
     fromRange: [number, number];
-    toRev: string;
+    toOptionValue: string;
     toRange: [number, number];
   }) => void;
   onClose: () => void;
   updateRelationData: {
-    fromRev: string;
+    fromOptionValue: string;
     fromRange: [number, number];
-    toRev: string;
+    toOptionValue: string;
     toRange: [number, number];
     fromOptions: UpdateRelationOption[];
     toOptions: UpdateRelationOption[];
@@ -89,14 +101,18 @@ const UpdateRelationDialog = ({
 
   const updateRelationRef = useRef<UpdateRelationRef>(null);
   const updateRelationDialogElRef = useRef<HTMLDialogElement>(null);
-  const [fromRev, setFromRev] = useState(updateRelationData.fromRev);
+  const [fromOptionValue, setFromOptionValue] = useState(
+    updateRelationData.fromOptionValue
+  );
   const [fromRange, setFromRange] = useState(updateRelationData.fromRange);
-  const [toRev, setToRev] = useState(updateRelationData.toRev);
+  const [toOptionValue, setToOptionValue] = useState(
+    updateRelationData.toOptionValue
+  );
   const [toRange, setToRange] = useState(updateRelationData.toRange);
 
   const setDefaultRange = () => {
     const fromRange = updateRelationData.fromOptions?.find(
-      (d) => d.rev === fromRev
+      (d) => d.value === fromOptionValue
     )?.range;
 
     if (fromRange) {
@@ -106,7 +122,7 @@ const UpdateRelationDialog = ({
     }
 
     const toRange = updateRelationData.toOptions?.find(
-      (d) => d.rev === toRev
+      (d) => d.value === toOptionValue
     )?.range;
 
     if (toRange) {
@@ -140,9 +156,9 @@ const UpdateRelationDialog = ({
         <button
           onClick={() => {
             onSave({
-              fromRev,
+              fromOptionValue,
               fromRange,
-              toRev,
+              toOptionValue,
               toRange,
             });
           }}
@@ -153,15 +169,15 @@ const UpdateRelationDialog = ({
       </div>
       <UpdateRelation
         ref={updateRelationRef}
-        fromRev={fromRev}
+        fromOptionValue={fromOptionValue}
         fromRange={fromRange}
-        toRev={toRev}
+        toOptionValue={toOptionValue}
         toRange={toRange}
         fromOptions={updateRelationData.fromOptions}
         toOptions={updateRelationData.toOptions}
-        onFromRevChange={setFromRev}
+        onFromOptionValueChange={setFromOptionValue}
         onFromRangeChange={setFromRange}
-        onToRevChange={setToRev}
+        onToOptionValueChange={setToOptionValue}
         onToRangeChange={setToRange}
       />
     </dialog>,

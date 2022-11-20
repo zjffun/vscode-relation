@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import { getContent, RelationServer } from "relation2-core";
+import { Relation, RelationServer } from "relation2-core";
 import * as vscode from "vscode";
 import * as nls from "vscode-nls";
 import { context } from "../share";
@@ -58,18 +58,29 @@ export class CreateRelationsWebview {
     if (!cwd) {
       return;
     }
-    const content = await getContent({
+    const relation = new Relation({
       workingDirectory: cwd,
-      rev: rev,
-      fileBaseDir: "",
-      filePath: path.relative(cwd, this.fromUri.fsPath),
     });
 
+    relation.fromAbsolutePath = this.fromUri.fsPath;
+
+    if (rev === "") {
+      this.postMessage({
+        type: "relationSetFromContent",
+        payload: {
+          content: relation.fromCurrentContent,
+          rev: "",
+        },
+      });
+      return;
+    }
+
+    await relation.setFromGitInfo({ rev });
     this.postMessage({
       type: "relationSetFromContent",
       payload: {
-        content,
-        rev,
+        content: await relation.getFromOriginalContent(),
+        rev: relation.fromGitRev,
       },
     });
   }
@@ -82,18 +93,29 @@ export class CreateRelationsWebview {
     if (!cwd) {
       return;
     }
-    const content = await getContent({
+    const relation = new Relation({
       workingDirectory: cwd,
-      rev: rev,
-      fileBaseDir: "",
-      filePath: path.relative(cwd, this.toUri.fsPath),
     });
 
+    relation.toAbsolutePath = this.toUri.fsPath;
+
+    if (rev === "") {
+      this.postMessage({
+        type: "relationSetToContent",
+        payload: {
+          content: relation.toCurrentContent,
+          rev: "",
+        },
+      });
+      return;
+    }
+
+    relation.setToGitInfo({ rev });
     this.postMessage({
       type: "relationSetToContent",
       payload: {
-        content,
-        rev,
+        content: relation.getToOriginalContent(),
+        rev: relation.toGitRev,
       },
     });
   }
@@ -168,10 +190,10 @@ export class CreateRelationsWebview {
             return;
           }
           case "relationAutoGenerateRelations": {
-            const fromFullPath = this.fromUri?.fsPath;
-            const toFullPath = this.toUri?.fsPath;
+            const fromAbsolutePath = this.fromUri?.fsPath;
+            const toAbsolutePath = this.toUri?.fsPath;
 
-            if (!fromFullPath || !toFullPath) {
+            if (!fromAbsolutePath || !toAbsolutePath) {
               return;
             }
 
@@ -183,10 +205,8 @@ export class CreateRelationsWebview {
 
             const relationServer = new RelationServer(cwd);
             const relations = await relationServer.createMarkdownRelations({
-              fromRev: "HEAD",
-              toRev: "HEAD",
-              fromPath: fromFullPath,
-              toPath: toFullPath,
+              fromAbsolutePath: fromAbsolutePath,
+              toAbsolutePath: toAbsolutePath,
             });
 
             this.postMessage({
@@ -211,21 +231,18 @@ export class CreateRelationsWebview {
             }
 
             const relationServer = new RelationServer(cwd);
+            const relations = relationServer.read();
 
-            const relations = [];
+            const newRelations = [];
             for (const relation of payload.relations) {
-              relations.push({
-                id: relation.id,
-                range: relation.range,
-                fromPath: relationServer.getFileRelativePath(fromFullPath),
-                toPath: relationServer.getFileRelativePath(toFullPath),
-                // TODO: git or content
-                // fromGitRev:
-                // fromGitPath:
-                // toGitRev:
-                // toGitPath:
+              const relationInstance = new Relation({
+                workingDirectory: cwd,
+                ...relation,
               });
+              newRelations.push(relationInstance);
             }
+
+            relationServer.write([...relations, ...newRelations]);
 
             return;
           }

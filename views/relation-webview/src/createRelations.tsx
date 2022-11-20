@@ -10,8 +10,8 @@ import {
 import "./createRelations.scss";
 
 const Page = () => {
-  const [fromRev, setFromRev] = useState("HEAD");
-  const [toRev, setToRev] = useState("HEAD");
+  const [fromRev, setFromRev] = useState("");
+  const [toRev, setToRev] = useState("");
   const [relations, setRelations] = useState<IRelation[]>([]);
   const [fromContent, setFromContent] = useState("");
   const [toContent, setToContent] = useState("");
