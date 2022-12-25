@@ -109,10 +109,17 @@ export class RelationWebview {
       toPath: this.relation?.toPath,
     });
 
-    const relationViewerData = await relationServer.getRelationViewerData({
-      fromPath: this.relation.fromPath,
-      toPath: this.relation.toPath,
-    });
+    const relations = relationServer.filter(
+      (relation) =>
+        relation.fromAbsolutePath ===
+          relation.getAbsolutePath(this.relation.fromPath) &&
+        relation.toAbsolutePath ===
+          relation.getAbsolutePath(this.relation.toPath)
+    );
+
+    const relationViewerData = await relationServer.getRelationViewerData(
+      relations
+    );
 
     const escapedRelationViewerDataJSONString = stringifyJsonScriptContent(
       relationViewerData,
