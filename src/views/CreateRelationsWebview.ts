@@ -110,11 +110,11 @@ export class CreateRelationsWebview {
       return;
     }
 
-    relation.setToGitInfo({ rev });
+    await relation.setToGitInfo({ rev });
     this.postMessage({
       type: "relationSetToContent",
       payload: {
-        content: relation.getToOriginalContent(),
+        content: await relation.getToOriginalContent(),
         rev: relation.toGitRev,
       },
     });

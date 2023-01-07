@@ -5,7 +5,6 @@ test.temp
 /out-view
 /out-tests
 
-yarn.lock
 .DS_Store
 *.vsix
 
