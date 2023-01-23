@@ -186,7 +186,7 @@
     "// use `--raw` to match $tsc-watch problemMatcher": "",
     "watch": "concurrently --raw \"yarn run editor-view:watch\" \"gulp watch\"",
     "pretest": "yarn run compile && yarn run lint",
-    "test": "tsc --project ./tests/tsconfig.json && node ./out-tests/test/runTest.js",
+    "test": "tsc --project ./tests/tsconfig.json && node ./out-tests/runTest.js",
     "lint": "eslint src --ext ts",
     "deploy": "vsce publish --yarn",
     "editor-view:watch": "webpack --config ./views/relation-webview/webpack.config.js --watch",
