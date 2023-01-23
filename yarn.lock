@@ -2510,6 +2510,13 @@ fastq@^1.6.0:
   dependencies:
     reusify "^1.0.4"
 
+fault@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.npmmirror.com/fault/-/fault-2.0.1.tgz#d47ca9f37ca26e4bd38374a7c500b5a384755b6c"
+  integrity sha512-WtySTkS4OKev5JtpHXnib4Gxiurzh5NCGvWrFaZ34m6JehfTUhKZvn9njTfw48t6JumVQOmrKqpmGcdwxnhqBQ==
+  dependencies:
+    format "^0.2.0"
+
 faye-websocket@^0.11.3:
   version "0.11.4"
   resolved "https://registry.npmmirror.com/faye-websocket/-/faye-websocket-0.11.4.tgz#7f0d9275cfdd86a1c963dc8b65fcc451edcbb1da"
@@ -2668,6 +2675,11 @@ for-own@^1.0.0:
   integrity sha512-0OABksIGrxKK8K4kynWkQ7y1zounQxP+CWnyclVwj81KW3vlLlGUx57DKGcP/LH216GzqnstnPocF16Nxs0Ycg==
   dependencies:
     for-in "^1.0.1"
+
+format@^0.2.0:
+  version "0.2.2"
+  resolved "https://registry.npmmirror.com/format/-/format-0.2.2.tgz#d6170107e9efdc4ed30c9dc39016df942b5cb58b"
+  integrity sha512-wzsgA6WOq+09wrU1tsJ09udeR/YZRaeArL9e1wPbFg3GG2yDnC2ldKpxs4xunpFF9DgqCqOIra3bc1HWrJ37Ww==
 
 forwarded@0.2.0:
   version "0.2.0"
@@ -3943,6 +3955,13 @@ mdast-util-from-markdown@^1.0.0:
     unist-util-stringify-position "^3.0.0"
     uvu "^0.5.0"
 
+mdast-util-frontmatter@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmmirror.com/mdast-util-frontmatter/-/mdast-util-frontmatter-1.0.0.tgz#ef12469379782e4a0fd995fed60cc3b871e6c819"
+  integrity sha512-7itKvp0arEVNpCktOET/eLFAYaZ+0cNjVtFtIPxgQ5tV+3i+D4SDDTjTzPWl44LT59PC+xdx+glNTawBdF98Mw==
+  dependencies:
+    micromark-extension-frontmatter "^1.0.0"
+
 mdast-util-to-string@^3.1.0:
   version "3.1.0"
   resolved "https://registry.npmmirror.com/mdast-util-to-string/-/mdast-util-to-string-3.1.0.tgz#56c506d065fbf769515235e577b5a261552d56e9"
@@ -4028,6 +4047,15 @@ micromark-core-commonmark@^1.0.1:
     micromark-util-symbol "^1.0.0"
     micromark-util-types "^1.0.1"
     uvu "^0.5.0"
+
+micromark-extension-frontmatter@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmmirror.com/micromark-extension-frontmatter/-/micromark-extension-frontmatter-1.0.0.tgz#612498e6dad87c132c95e25f0918e7cc0cd535f6"
+  integrity sha512-EXjmRnupoX6yYuUJSQhrQ9ggK0iQtQlpi6xeJzVD5xscyAI+giqco5fdymayZhJMbIFecjnE2yz85S9NzIgQpg==
+  dependencies:
+    fault "^2.0.0"
+    micromark-util-character "^1.0.0"
+    micromark-util-symbol "^1.0.0"
 
 micromark-factory-destination@^1.0.0:
   version "1.0.0"
@@ -5251,27 +5279,35 @@ relateurl@^0.2.7:
   resolved "https://registry.npmmirror.com/relateurl/-/relateurl-0.2.7.tgz#54dbf377e51440aca90a4cd274600d3ff2d888a9"
   integrity sha512-G08Dxvm4iDN3MLM0EsP62EDV9IuhXPR6blNz6Utcp7zyV3tr4HVNINt6MpaRWbxoOHT3Q7YN2P+jaHX8vUbgog==
 
-relation2-core@0.0.13:
-  version "0.0.13"
-  resolved "https://registry.npmmirror.com/relation2-core/-/relation2-core-0.0.13.tgz#982bdc626561ac71417a555d390964ce297aad45"
-  integrity sha512-R1rlyzUExed38AYSWGgKcb59lxj5RoL3Ozq58Lwv3JcmpI9c63Uhe8cLRRiD0xO178esi0Rqjo3rNG+xLyBOxA==
+relation2-core@^0.0.23:
+  version "0.0.23"
+  resolved "https://registry.npmmirror.com/relation2-core/-/relation2-core-0.0.23.tgz#813366a556622eabf432a04d4c39fd9d5fa463fe"
+  integrity sha512-QIWfstKyA2eUkvXgRbZe4POXhuJR+hbXveLxdFwO2HNDMc3XlUqnJ2xC3mCx///ncUa2EggMLU1kWXx6sidHjA==
   dependencies:
     diff "^5.0.0"
     fs-extra "^10.1.0"
     lodash "^4.17.21"
     nanoid "^4.0.0"
+    remark-frontmatter "^4.0.1"
     remark-parse "^10.0.1"
     simple-git "^3.10.0"
     split-split "^0.0.2"
     unified "^10.1.2"
 
-relation2-react@0.0.13:
-  version "0.0.13"
-  resolved "https://registry.npmmirror.com/relation2-react/-/relation2-react-0.0.13.tgz#190bff2d24f168b9555eb47124a6249ea6c8fada"
-  integrity sha512-dK9rw2leokFo5SDA725QvhfyL2hACJspQuNc1QHdL649IAFjsxWzWck56sjbfNKhM7VMG85K6I1z5jp6UE/ZTg==
+relation2-react@^0.0.23:
+  version "0.0.23"
+  resolved "https://registry.npmmirror.com/relation2-react/-/relation2-react-0.0.23.tgz#80fc15220fa02b2d85ca49d782f6120fc73b0f1d"
+  integrity sha512-VOHEYSq5d8TG4Qp5PV7ZL4XPDpwMR8ZtMsjep7cPAvVSpq/7vPn06Iuee2kdTR+RNp4AxU62juhIT2KBPqmBNA==
+
+remark-frontmatter@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.npmmirror.com/remark-frontmatter/-/remark-frontmatter-4.0.1.tgz#84560f7ccef114ef076d3d3735be6d69f8922309"
+  integrity sha512-38fJrB0KnmD3E33a5jZC/5+gGAC2WKNiPw1/fdXJvijBlhA7RCsvJklrYJakS0HedninvaCYW8lQGf9C918GfA==
   dependencies:
-    relation2-core "0.0.13"
-    relation2-react "0.0.13"
+    "@types/mdast" "^3.0.0"
+    mdast-util-frontmatter "^1.0.0"
+    micromark-extension-frontmatter "^1.0.0"
+    unified "^10.0.0"
 
 remark-parse@^10.0.1:
   version "10.0.1"
