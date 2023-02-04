@@ -239,6 +239,10 @@ export class CreateRelationsWebview {
                 workingDirectory: cwd,
                 ...relation,
               });
+              relationInstance.fromAbsolutePath = fromFullPath;
+              relationInstance.toAbsolutePath = toFullPath;
+              await relationInstance.autoSetFromRev();
+              await relationInstance.autoSetToRev();
               newRelations.push(relationInstance);
             }
 
