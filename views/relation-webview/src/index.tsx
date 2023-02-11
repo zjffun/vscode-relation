@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { IRelationViewerData } from "relation2-core";
 import {
@@ -119,6 +119,21 @@ const Page = () => {
       })
     );
   };
+
+  useEffect(() => {
+    const listener = (event: any) => {
+      if (event.data.type === "updateRelationViewerData") {
+        setRelationViewerData(event.data.payload);
+        setUpdateRelationDialogVisible(false);
+      }
+    };
+
+    window.addEventListener("message", listener);
+
+    return () => {
+      window.removeEventListener("message", listener);
+    };
+  }, []);
 
   return (
     <main className={"relation-overview"}>

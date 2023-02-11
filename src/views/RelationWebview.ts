@@ -44,9 +44,41 @@ export class RelationWebview {
     this.loadPage();
   }
 
+  public postMessage({ type, payload }: { type: string; payload: any }) {
+    this.panel.webview.postMessage({ type, payload });
+  }
+
   private async loadPage() {
     const html = await this.getHtmlForWebview(this.panel.webview);
     this.panel.webview.html = html;
+  }
+
+  private async updateRelationViewerData() {
+    const relationViewerData = await this.getRelationViewerData();
+    this.postMessage({
+      type: "updateRelationViewerData",
+      payload: relationViewerData,
+    });
+  }
+
+  private async getRelationViewerData() {
+    const relationServer = new RelationServer(
+      this.relation?.workspaceFolderUri?.path
+    );
+
+    const relations = relationServer.filter(
+      (relation) =>
+        relation.fromAbsolutePath ===
+          relation.getAbsolutePath(this.relation.fromPath) &&
+        relation.toAbsolutePath ===
+          relation.getAbsolutePath(this.relation.toPath)
+    );
+
+    const relationViewerData = await relationServer.getRelationViewerData(
+      relations
+    );
+
+    return relationViewerData;
   }
 
   private async getHtmlForWebview(webview: vscode.Webview): Promise<string> {
@@ -164,7 +196,9 @@ export class RelationWebview {
               return relation;
             });
 
-            await this.loadPage();
+            await this.updateRelationViewerData();
+
+            return;
           }
 
           case "relationDetailButtonClick":
@@ -194,7 +228,7 @@ export class RelationWebview {
               })
             );
 
-            await this.loadPage();
+            await this.updateRelationViewerData();
 
             return;
           }
@@ -209,7 +243,7 @@ export class RelationWebview {
               );
             }
 
-            this.loadPage();
+            await this.updateRelationViewerData();
 
             return;
           }
@@ -224,7 +258,7 @@ export class RelationWebview {
               );
             }
 
-            this.loadPage();
+            await this.updateRelationViewerData();
 
             return;
           }
